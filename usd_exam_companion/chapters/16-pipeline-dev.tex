@@ -1,0 +1,33 @@
+\DomainHeader{Pipeline Development}{14\%}
+
+\begin{Objectives}
+  \item Convert USD to common formats and ensure fidelity.
+  \item Document asset structure guidelines.
+  \item Explain USDC vs USDA trade-offs.
+  \item Implement round-trip pipelines between DCC and USD.
+  \item Integrate custom resolvers to manage asset paths.
+  \item Represent custom metadata.
+  \item Validate asset paths are formatted correctly.
+  \item Write or extend a USD importer in a DCC.
+\end{Objectives}
+
+\begin{Resources}
+  \item Learn OpenUSD: Asset Structure; Composition Basics; Beyond the Basics
+  \item Concepts: defaultPrim; kind; model hierarchy; variant authoring best practice
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Asset structure}: stable root prim, predictable paths, consistent kind/model hierarchy.
+  \item \textbf{Collaboration}: separate “authored source” from “published” layers; use sublayers for departments.
+  \item \textbf{Validation gates}: enforce rules at publish time, not when scenes break downstream.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: Asset contract}
+Write 10 rules for your “publishable USD asset contract”.
+\AnswerLines{10}
+
+\subsection*{Drill 2: Naming and layout}
+Propose a directory structure for an asset with geo, materials, and anim.
+\AnswerLines{8}

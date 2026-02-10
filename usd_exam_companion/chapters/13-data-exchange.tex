@@ -1,0 +1,35 @@
+\DomainHeader{Data Exchange}{15\%}
+
+\begin{Objectives}
+  \item Convert USD assets to common formats (e.g., glTF) and preserve fidelity.
+  \item Document conceptual data mappings (e.g., USD $\rightarrow$ MaterialX).
+  \item Explain USDC vs USDA trade-offs.
+  \item Implement round-trip pipelines to/from a DCC.
+  \item Use schemas for nonstandard attributes/structures during import/export.
+  \item Write validators for exported USD assets.
+  \item Write exporters/converters to USD.
+  \item Write or extend USD importers in a DCC.
+\end{Objectives}
+
+\begin{Resources}
+  \item Learn OpenUSD: Developing Data Exchange Pipelines
+  \item OpenUSD tutorials: Traversing a Stage; Converting Between Layer Formats
+  \item Tooling: \texttt{usdchecker}, \texttt{usdcat}, \texttt{usdzip}
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{USDA}: readable, diff-friendly; heavier to load/parse.
+  \item \textbf{USDC}: binary crate; faster IO; harder to diff manually.
+  \item \textbf{Round-trip reality}: you will lose data unless you define mapping rules and validation.
+  \item \textbf{Validation}: treat exports like “APIs” — validate schema presence, units, axes, bindings, and paths.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: USDA vs USDC choice}
+Write 4 situations where you would mandate one over the other.
+\AnswerLines{7}
+
+\subsection*{Drill 2: Validator checklist}
+List 10 checks your exporter should do before shipping an asset.
+\AnswerLines{10}

@@ -1,0 +1,51 @@
+\documentclass[11pt,oneside]{book}
+
+\input{styles/setup}
+\input{styles/usdlisting}
+\input{styles/macros}
+\input{styles/titlepages}
+
+\begin{document}
+\frontmatter
+\HalfTitlePage
+\TitlePage
+\ColophonPage
+
+\chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+This companion is structured around NVIDIA’s \textit{NCP: OpenUSD Development Exam Study Guide (v1.1.0)}.
+It reorganises the blueprint into a book-like flow and adds space for notes, drills, and checklists.
+
+\bigskip
+\noindent\textbf{How to use this book}
+\begin{itemize}[leftmargin=*]
+  \item For each domain: read the cheat sheet, work the drills, then do the questions.
+  \item Keep a running “gotchas” list (composition strength, instancing edits, material binding, etc.).
+  \item Revisit the sample questions after each domain.
+\end{itemize}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\mainmatter
+\input{chapters/00-intro}
+\input{chapters/01-blueprint}
+
+\part{Domains}
+\input{chapters/10-composition}
+\input{chapters/11-content-aggregation}
+\input{chapters/12-customising-usd}
+\input{chapters/13-data-exchange}
+\input{chapters/14-data-modelling}
+\input{chapters/15-debugging}
+\input{chapters/16-pipeline-dev}
+\input{chapters/17-visualisation}
+
+\part{Practice}
+\input{chapters/20-sample-questions}
+\input{chapters/21-answer-key}
+
+\backmatter
+\addcontentsline{toc}{chapter}{Index}
+\printindex
+\end{document}

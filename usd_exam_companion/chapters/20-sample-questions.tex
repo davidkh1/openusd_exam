@@ -1,0 +1,285 @@
+\chapter{Certification Sample Questions}
+
+\section*{Question 1}
+\addcontentsline{toc}{section}{Question 1}
+\noindent\textbf{Domain:} Composition\par
+\vspace{0.4em}
+\noindent\textbf{Question:} What is the primary purpose of the \texttt{defaultPrim} metadata in a USD layer?
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ It specifies which prim is used as the root when the layer is referenced.
+  \item B.\ It defines which material is used as the default for geometry in the layer.
+  \item C.\ It sets which timeCode is used as the default for animation in the layer.
+  \item D.\ It specifies the default prim type when defining a new custom IsA schema.
+\end{itemize}
+
+\section*{Question 2}
+\addcontentsline{toc}{section}{Question 2}
+\noindent\textbf{Domain:} Composition\par
+\vspace{0.4em}
+\noindent\textbf{Question:} Given the following USD layer structure, what will be the final composed value of \texttt{xformOp:translate} on \texttt{/World/Chair} on a stage with root layer \texttt{scene.usda}?
+\subsection*{Layer snippets}
+\noindent\textbf{chair\_base.usda}
+\begin{lstlisting}
+#usda 1.0
+def Xform "Chair" {
+    double3 xformOp:translate = (0, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate"]
+}
+\end{lstlisting}
+
+\noindent\textbf{chair\_repositioned.usda}
+\begin{lstlisting}
+#usda 1.0
+def Xform "Chair" {
+    double3 xformOp:translate = (1, 0, 0)
+}
+\end{lstlisting}
+
+\noindent\textbf{scene.usda}
+\begin{lstlisting}
+#usda 1.0
+def Xform "World" {
+    def Xform "Chair" (
+        prepend references = [@./chair_base.usda@, @./chair_repositioned@]
+    ) {
+        double3 xformOp:translate = (0, 1, 0)
+    }
+}
+\end{lstlisting}
+
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ (0, 0, 0)
+  \item B.\ (1, 0, 0)
+  \item C.\ (0, 1, 0)
+  \item D.\ (1, 1, 0)
+\end{itemize}
+
+\section*{Question 3}
+\addcontentsline{toc}{section}{Question 3}
+\noindent\textbf{Domain:} Data Modelling\par
+\vspace{0.4em}
+\noindent\textbf{Question:} Which of the following attributes are required to properly define a \texttt{UsdGeomMesh} prim? \textit{(Select three options.)}
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ points
+  \item B.\ faceVertexIndices
+  \item C.\ primvars:displayColor
+  \item D.\ extent
+  \item E.\ normals
+\end{itemize}
+
+\section*{Question 4}
+\addcontentsline{toc}{section}{Question 4}
+\noindent\textbf{Domain:} Data Modelling\par
+\vspace{0.4em}
+\noindent\textbf{Question:} You have a \texttt{UsdGeomMesh} with 1,000 vertices and 500 faces. The mesh uses \texttt{faceVertexIndices} to define triangular faces. What should be the length of the \texttt{faceVertexIndices} array?
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ 500 — one index per face
+  \item B.\ 1,000 — one index per vertex
+  \item C.\ 1,500 — three indices per triangular face
+  \item D.\ 2,000 — four indices per face (including winding order)
+\end{itemize}
+
+\section*{Question 5}
+\addcontentsline{toc}{section}{Question 5}
+\noindent\textbf{Domain:} Pipeline Development\par
+\vspace{0.4em}
+\noindent\textbf{Question:} When creating a procedural mesh in USD, which attributes must be kept synchronised to ensure the mesh remains valid? \textit{(Select two options.)}
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ points and extent — when vertex positions change
+  \item B.\ faceVertexIndices and faceVertexCounts — when topology changes
+  \item C.\ normals and primvars:displayColor — when shading changes
+  \item D.\ purpose and visibility — when rendering properties change
+\end{itemize}
+
+\section*{Question 6}
+\addcontentsline{toc}{section}{Question 6}
+\noindent\textbf{Domain:} Customising USD\par
+\vspace{0.4em}
+\noindent\textbf{Question:} You want to create a custom USD schema that adds physics properties to geometry prims. Which base class should your schema inherit from?
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ UsdSchemaBase
+  \item B.\ UsdTyped
+  \item C.\ UsdAPISchemaBase
+  \item D.\ UsdPhysicsBase
+\end{itemize}
+
+\section*{Question 7}
+\addcontentsline{toc}{section}{Question 7}
+\noindent\textbf{Domain:} Pipeline Development\par
+\vspace{0.4em}
+\noindent\textbf{Question:} What are some primary advantages of using USD’s composition system in a production pipeline? \textit{(Select two options.)}
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ Layers enable version control and tracking of asset changes across the pipeline.
+  \item B.\ Layers allow multiple users to collaborate on the same scene without conflicts.
+  \item C.\ Layers support nondestructive editing and make it easy to revert or update changes.
+  \item D.\ Layers improve scene performance by optimising data organisation and access.
+\end{itemize}
+
+\section*{Question 8}
+\addcontentsline{toc}{section}{Question 8}
+\noindent\textbf{Domain:} Pipeline Development\par
+\vspace{0.4em}
+\noindent\textbf{Question:} When designing a USD-based pipeline, which architectural decisions are most critical for long-term success? \textit{(Select two options.)}
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ Establishing clear and consistent asset naming conventions and directory structures.
+  \item B.\ Implementing comprehensive error handling and validation at all pipeline boundaries.
+  \item C.\ Defining an asset structure once that will meet all present and future requirements.
+  \item D.\ Requiring that all content is always authored, managed, and encoded in USD format.
+\end{itemize}
+
+\section*{Question 9}
+\addcontentsline{toc}{section}{Question 9}
+\noindent\textbf{Domain:} Visualisation\par
+\vspace{0.4em}
+\noindent\textbf{Question:} What is the primary purpose of the \texttt{UsdGeomImageable} schema in USD?
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ It defines common geometric properties for 3D objects.
+  \item B.\ It provides common properties for objects that can be rendered.
+  \item C.\ It manages how materials are assigned to geometric primitives.
+  \item D.\ It defines properties for texture image data for 3D objects.
+\end{itemize}
+
+\section*{Question 10}
+\addcontentsline{toc}{section}{Question 10}
+\noindent\textbf{Domain:} Visualisation\par
+\vspace{0.4em}
+\noindent\textbf{Question:} You want to create a material that can be easily customised with different colours and textures. Which USD shading approach would be most appropriate?
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ Create a single material with hardcoded shader parameters.
+  \item B.\ Create a material with exposed parameters that can be overridden.
+  \item C.\ Create separate materials for each colour/texture combination.
+  \item D.\ Use only the default material and modify it at render time.
+\end{itemize}
+
+\section*{Question 11}
+\addcontentsline{toc}{section}{Question 11}
+\noindent\textbf{Domain:} Content Aggregation\par
+\vspace{0.4em}
+\noindent\textbf{Question:} What happens when you reference a USD file with \texttt{metersPerUnit = 1.0} (metres) into a stage with \texttt{metersPerUnit = 0.01} (centimetres)?
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ The USD runtime automatically rescales the referenced geometry to match the stage’s unit system.
+  \item B.\ The referenced geometry appears 100 times smaller than intended, as USD does not automatically convert units.
+  \item C.\ The referenced geometry appears 100 times larger than intended, due to USD scaling it up automatically.
+  \item D.\ The referenced geometry is not composed onto the stage, because the unit systems do not match.
+\end{itemize}
+
+\section*{Question 12}
+\addcontentsline{toc}{section}{Question 12}
+\noindent\textbf{Domain:} Data Exchange\par
+\vspace{0.4em}
+\noindent\textbf{Question:} The following is a snippet of a USDA layer output by a new DCC for an exported asset. What is the error with the material binding in this export?
+\begin{lstlisting}
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 0.01
+    upAxis = "Z"
+)
+def Xform "World" ( kind = "component" )
+{
+    def Mesh "bolt" (
+        prepend apiSchemas = ["MaterialBindingAPI"]
+    )
+    {
+        rel material:binding = </Materials/metal> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        # Mesh definition...
+    }
+}
+def Scope "Materials"
+{
+    def Material "metal" { # Material definition... }
+}
+\end{lstlisting}
+
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ The use of \texttt{bindMaterialAs = "weakerThanDescendants"} is not valid in this context.
+  \item B.\ The material binding is applied to the Mesh prim, but it should be applied to a Subset instead.
+  \item C.\ The material binding is targeting a prim that is outside the hierarchy of the \texttt{defaultPrim}.
+  \item D.\ The material binding data should go on the Material prim and target prims to bind to.
+\end{itemize}
+
+\section*{Question 13}
+\addcontentsline{toc}{section}{Question 13}
+\noindent\textbf{Domain:} Debugging and Troubleshooting\par
+\vspace{0.4em}
+\noindent\textbf{Question:} An artist reports that \texttt{MyBox} no longer changes to blue even though they set \texttt{loftedColor="blue"} in \texttt{main.usda}. Explain why the box is no longer changing to blue.
+
+\subsection*{Layer snippets}
+\noindent\textbf{main.usda}
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "World" )
+def Xform "World"
+{
+    def Xform "MyBox" (
+        prepend references = @./MyBox.usda@
+        variants = { string loftedColor = "blue" }
+    )
+    {
+        over "Cube" (
+            variants = { string color = "red" }
+        )
+        {
+        }
+    }
+}
+\end{lstlisting}
+
+\noindent\textbf{MyBox.usda}
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "MyBox" )
+def Xform "MyBox" (
+    prepend payload = @./contents.usda@
+    prepend variantSets = "loftedColor"
+    variants = { string loftedColor = "red" }
+)
+{
+    variantSet "loftedColor" = {
+        "red" { over "Cube" ( variants = { string color = "red" } ) { } }
+        "blue"{ over "Cube" ( variants = { string color = "blue"} ) { } }
+    }
+}
+\end{lstlisting}
+
+\noindent\textbf{contents.usda}
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "MyBox" )
+def Xform "MyBox"
+{
+    def Cube "Cube"
+    (
+        prepend variantSets = "color"
+        variants = { string color = "red" }
+    )
+    {
+        variantSet "color" = {
+            "red"  { color3f[] primvars:displayColor = [(1, 0, 0)] }
+            "blue" { color3f[] primvars:displayColor = [(0, 0, 1)] }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection*{Answer Choices}
+\begin{itemize}[leftmargin=*]
+  \item A.\ The “red” selection in \texttt{contents.usda} is strongest and overrides all other opinions.
+  \item B.\ The direct local opinion for the \texttt{color} variant selection in \texttt{main.usda} is stronger than the opinion authored by \texttt{loftedColor}.
+  \item C.\ \texttt{loftedColor} does not set \texttt{primvars:displayColor}, so changing it cannot affect colour.
+  \item D.\ Variant selections cannot be authored in \texttt{main.usda}; they must be authored in \texttt{MyBox.usda}.
+\end{itemize}

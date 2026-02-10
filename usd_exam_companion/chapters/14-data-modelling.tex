@@ -1,0 +1,33 @@
+\DomainHeader{Data Modelling}{13\%}
+
+\begin{Objectives}
+  \item Add a primvar to a mesh.
+  \item Choose correct value types for attribute data.
+  \item Represent custom metadata.
+  \item Retrieve properties of a prim.
+  \item Diagnose causes of unexpected visual results.
+  \item Update \texttt{extent} after updating \texttt{points}.
+\end{Objectives}
+
+\begin{Resources}
+  \item Learn OpenUSD: Scene Description Blueprints; Beyond the Basics
+  \item OpenUSD user guide: Rendering — working with primvars
+  \item OpenUSD API: Sdf datatypes; UsdGeomPrimvar; Boundable/Xformable; XformCache
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Attributes vs metadata}: attributes are time-sampleable properties; metadata describes prim/layer/stage behaviour.
+  \item \textbf{Primvars}: namespaced as \texttt{primvars:*}; interpolation matters (constant/uniform/vertex/faceVarying).
+  \item \textbf{UVs}: commonly \texttt{primvars:st} (often faceVarying).
+  \item \textbf{extent}: bounding box; update it when \texttt{points} changes or downstream consumers may cull incorrectly.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: Primvar practice}
+Write a minimal Mesh that includes \texttt{primvars:st} with faceVarying interpolation.
+\AnswerLines{10}
+
+\subsection*{Drill 2: Type discipline}
+Give 6 examples of common types (token, rel, float3, color3f[], matrix4d, asset) and what you’d store in them.
+\AnswerLines{8}

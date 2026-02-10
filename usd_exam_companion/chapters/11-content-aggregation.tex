@@ -1,0 +1,38 @@
+\DomainHeader{Content Aggregation}{10\%}
+
+\begin{Objectives}
+  \item Add a new prototype to a \texttt{UsdGeomPointInstancer}.
+  \item Edit an \texttt{instanceProxy} mesh (e.g., colour) without breaking instancing.
+  \item Hide PointInstancer instances efficiently.
+  \item Implement/manage USD instances for reuse in large scenes.
+  \item Remove properties from instanced component prims in an assembly stage.
+\end{Objectives}
+
+\begin{Resources}
+  \item Learn OpenUSD: Asset Modularity and Instancing
+  \item OpenUSD API: Scenegraph Instancing; UsdGeomPointInstancer
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Two main mechanisms}: scenegraph instancing (native instancing) vs PointInstancer (many instances of prototypes).
+  \item \textbf{PointInstancer}: instances are lightweight; per-instance transforms/visibility via arrays.
+  \item \textbf{instanceProxy}: lets you target inside an instance without flattening it.
+  \item \textbf{Don’t break instancing}: avoid authoring edits that force unique topology/material networks per instance unless intended.
+  \item \textbf{Hiding instances}: usually via instance indices/visibility masks rather than duplicating geometry.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: “What breaks instancing?”}
+List 5 edits that commonly de-instance things.
+\AnswerLines{7}
+
+\subsection*{Drill 2: InstanceProxy mental model}
+Explain what path you expect when selecting a prim inside an instance.
+\AnswerLines{6}
+
+\subsection*{Mini-checklist}
+\begin{itemize}[leftmargin=*]
+  \item[$\square$] I can explain why instanceProxy exists.
+  \item[$\square$] I can describe PointInstancer data layout (protoIndices + xforms).
+\end{itemize}

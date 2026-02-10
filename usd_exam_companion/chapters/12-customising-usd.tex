@@ -1,0 +1,40 @@
+\DomainHeader{Customising USD}{6\%}
+
+\begin{Objectives}
+  \item Build a USD plug-in against a specific USD version.
+  \item Build USD from source with custom dependencies.
+  \item Create custom model kinds when appropriate.
+  \item Create custom schemas for proprietary data models.
+  \item Integrate a custom resolver for dynamic asset paths.
+  \item Use schemas for nonstandard attributes/structures during import/export.
+  \item Write a SceneIndex plug-in that generates Hydra prims.
+  \item Write an AssetResolver that generates in-memory renderable primitives.
+\end{Objectives}
+
+\begin{Resources}
+  \item OpenUSD tutorial: Generating New Schema Classes
+  \item OpenUSD API: PlugRegistry; Ar (Asset Resolution); file format plug-ins; usdGenSchema
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Typed schema} vs \textbf{API schema}: typed defines a prim type; API adds behaviour/properties to existing types.
+  \item \textbf{AssetResolver (Ar)}: decides how asset paths resolve (search paths, versions, packages, remote stores).
+  \item \textbf{Plugins}: keep version compatibility in mind; pin USD ABI/version carefully.
+  \item \textbf{Schema goal}: make data queryable/validatable; avoid dumping everything into arbitrary attributes.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: Typed vs API schema}
+Give 2 examples of when you would choose each.
+\AnswerLines{6}
+
+\subsection*{Drill 2: Resolver design}
+Sketch an example: \texttt{asset://chair?variant=oak} $\rightarrow$ actual file path.
+\AnswerLines{7}
+
+\subsection*{Mini-checklist}
+\begin{itemize}[leftmargin=*]
+  \item[$\square$] I can explain what a resolver does in one sentence.
+  \item[$\square$] I can justify using a custom schema instead of ad-hoc attrs.
+\end{itemize}

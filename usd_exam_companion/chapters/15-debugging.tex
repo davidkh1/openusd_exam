@@ -1,0 +1,31 @@
+\DomainHeader{Debugging and Troubleshooting}{11\%}
+
+\begin{Objectives}
+  \item Recognise when \texttt{SdfChangeBlock} helps performance.
+  \item Diagnose why opinions do not take effect on a composed stage.
+  \item Resolve asset-management/path issues.
+  \item Understand causes of unexpected visual results.
+  \item Use diagnostics/profiling: TfDebug, diagnostic delegates, Trace, TfMallocTag, etc.
+\end{Objectives}
+
+\begin{Resources}
+  \item Tooling: \texttt{usdview} (LayerStack / composition diagnostics), \texttt{usdcat}
+  \item Concepts: LIVERPS; muting layers; Pcp errors; edit targets
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{First question}: “Is my edit going into the layer I think it is?” (edit target).
+  \item \textbf{Second}: “Is there a stronger opinion upstream?” (LIVERPS).
+  \item \textbf{Third}: “Is the prim actually composed (payload loaded, reference valid, variant selection)?”
+  \item \textbf{SdfChangeBlock}: batch many edits to reduce recomposition overhead.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: Three-step diagnosis}
+Write your personal 3-step flow for “why didn’t my value apply?”
+\AnswerLines{8}
+
+\subsection*{Drill 2: Path failure taxonomy}
+List 5 common reasons asset paths fail in production (and what fixes them).
+\AnswerLines{8}

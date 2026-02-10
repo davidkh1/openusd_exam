@@ -1,0 +1,58 @@
+\DomainHeader{Composition}{23\%}
+
+\begin{Objectives}
+  \item Change the strength of an opinion.
+  \item Choose an instancing style for different scales.
+  \item Compare referencing vs payloads vs sublayers; identify use-cases.
+  \item Reference the same animation with different time-offsets.
+  \item Design layering strategies for multi-user workflows.
+  \item Explain LIVERPS ordering.
+  \item Decide when variants are/are not appropriate.
+  \item Diagnose why an opinion does not take effect in a composed stage.
+  \item Prepare internal assets for external delivery.
+  \item Remove properties from instanced component prims in an assembly stage.
+  \item Split a monolithic asset to support collaboration.
+\end{Objectives}
+
+\begin{Resources}
+  \item Learn OpenUSD: Creating Composition Arcs
+  \item OpenUSD tutorials: Referencing Layers; Authoring Variants
+  \item OpenUSD glossary: LIVERPS, Sublayers, Variant Sets, References, Payloads, Layer Offsets, Edit Target, Flatten
+  \item OpenUSD API: Scenegraph Instancing; UsdEditTarget; UsdStage::Flatten; UsdReferences
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Strength} in composition: stronger opinions override weaker ones.
+  \item \textbf{LIVERPS} (common debugging lens): \textbf{L}ocal, \textbf{I}nherits, \textbf{V}ariants, \textbf{R}eferences, \textbf{P}ayload, \textbf{S}ublayers.
+  \item \textbf{Sublayers}: stack whole layers; great for “edits on top”, shots, departments.
+  \item \textbf{References}: bring in prim specs; good for asset assembly and reuse.
+  \item \textbf{Payloads}: like references but can be deferred/unloaded for performance.
+  \item \textbf{Variants}: discrete mutually exclusive choices; avoid using as a “parameter bag”.
+  \item \textbf{Layer offsets}: time offset/scale on a reference for re-timing.
+  \item \textbf{Debug habit}: ask “where is the strongest authored opinion and what arc brought it here?”
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: LIVERPS in 60 seconds}
+Given three layers (sublayer + reference + local override), state which wins for a single attribute and why.
+\AnswerLines{6}
+
+\subsection*{Drill 2: Reference vs Payload decision}
+Write 3 criteria when you choose payload instead of reference.
+\AnswerLines{6}
+
+\subsection*{Drill 3: Variant misuse}
+List 3 signs you are abusing variants (and what to use instead).
+\AnswerLines{6}
+
+\subsection*{Drill 4: Time-offset reasoning}
+Explain how to reference the same animation twice with different start times.
+\AnswerLines{6}
+
+\subsection*{Mini-checklist (tick when mastered)}
+\begin{itemize}[leftmargin=*]
+  \item[$\square$] I can predict which layer wins for any single attribute.
+  \item[$\square$] I can explain defaultPrim and why it matters for referencing.
+  \item[$\square$] I can explain “why my override doesn’t take effect” without guessing.
+\end{itemize}

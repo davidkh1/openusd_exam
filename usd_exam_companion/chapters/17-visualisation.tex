@@ -1,0 +1,30 @@
+\DomainHeader{Visualisation}{8\%}
+
+\begin{Objectives}
+  \item Add a primvar to a mesh.
+  \item Assign UsdPreviewSurface materials.
+  \item Bind materials to a mesh.
+  \item Build a UsdPreviewSurface network that reads diffuse colours from a primvar.
+\end{Objectives}
+
+\begin{Resources}
+  \item OpenUSD user guide: Rendering with USD
+  \item OpenUSD API: UsdShadeMaterial; MaterialBindingAPI; UsdGeomSubset; UsdLux
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{UsdShade}: shading networks as scene description.
+  \item \textbf{Material binding}: usually via \texttt{material:binding} relationship.
+  \item \textbf{GeomSubset}: bind per-face materials without splitting meshes.
+  \item \textbf{Primvar-driven shading}: wire primvar reader into UsdPreviewSurface inputs.
+\end{itemize}
+
+\DrillsTitle
+\subsection*{Drill 1: Material binding}
+Write a minimal example that binds a material at \texttt{/World/Looks/MyMat} to \texttt{/World/Geo/MyMesh}.
+\AnswerLines{10}
+
+\subsection*{Drill 2: GeomSubset use-case}
+Describe when you would use GeomSubset and what attribute it relies on.
+\AnswerLines{6}
