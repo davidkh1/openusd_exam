@@ -47,6 +47,7 @@ CHAPTER_LISTINGS = {
     ],
     '12-customizing-usd.tex': [
         'c12/schema.usda',
+        'c12/schema.usda',
         'c12/apply_api.py',
         'c12/kinds_plugin.json',
         'c12/check_kinds.py',
@@ -116,8 +117,11 @@ CHAPTER_LISTINGS = {
     ],
 }
 
-USDA_FILES = [f for files in CHAPTER_LISTINGS.values() for f in files
-              if f.endswith('.usda')]
+# A filename listed twice means the book shows that file in two fragments;
+# the fixture appends them back into one file (dedupe here for the parse test).
+USDA_FILES = list(dict.fromkeys(
+    f for files in CHAPTER_LISTINGS.values() for f in files
+    if f.endswith('.usda')))
 
 LISTING_RE = re.compile(
     r'\\begin\{lstlisting\}(?:\[[^\]]*\])?\n(.*?)\\end\{lstlisting\}', re.S)
@@ -136,6 +140,8 @@ def scenarios(tmp_path_factory):
         for rel, body in zip(files, listings):
             path = root / rel
             path.parent.mkdir(parents=True, exist_ok=True)
+            if path.exists():  # second fragment of a split listing
+                body = path.read_text() + body
             path.write_text(body)
     return root
 

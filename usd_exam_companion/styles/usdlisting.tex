@@ -25,6 +25,18 @@
   morestring=[b]",
 }
 
+% Keep each example on one page: box every listing whole. A listing taller
+% than the text column must opt out with \AllowListingBreak on the line
+% before it (the flag resets after one use).
+\usepackage{etoolbox}
+\newif\ifLongListing
+\newcommand{\AllowListingBreak}{\global\LongListingtrue}
+\BeforeBeginEnvironment{lstlisting}{%
+  \ifLongListing\else\par\vspace{0pt minus 3pt}\noindent
+  \begin{minipage}{\linewidth}\fi}
+\AfterEndEnvironment{lstlisting}{%
+  \ifLongListing\global\LongListingfalse\else\end{minipage}\par\fi}
+
 \lstset{
   language=USDA,
   basicstyle=\ttfamily\small,
@@ -39,8 +51,8 @@
   breaklines=true,
   tabsize=2,
   showstringspaces=false,
-  aboveskip=0.8em,
-  belowskip=0.6em,
+  aboveskip=0.55em,
+  belowskip=0.45em,
   % "produces" idiom: a line starting with ";;" renders without the marker,
   % bold and amber — marking scene description that the code just authored.
   moredelim=**[il][\bfseries\color{usdNew}]{;;},

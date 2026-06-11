@@ -9,6 +9,12 @@
 
 \begin{document}
 \frontmatter
+% Front cover, bound in as page one of the PDF edition (full bleed).
+\begin{titlepage}
+  \AddToShipoutPictureBG*{\AtPageLowerLeft{%
+    \includegraphics[width=\paperwidth,height=\paperheight]{cover/cover_page.png}}}
+  \null
+\end{titlepage}
 % Half title omitted in the PDF-first edition: it duplicated the title page.
 % \HalfTitlePage stays defined in styles/titlepages.tex for a print edition.
 \TitlePage

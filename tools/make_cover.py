@@ -1,7 +1,10 @@
-"""Generate a v1 KDP ebook cover (1600x2560) from the book's own assets.
+"""Generate the ebook covers from the book's own assets.
 
 Layout: dark ground, green accent rules, title block, the red-cube render on
 a white card (the book's signature figure), author + delivery line.
+
+Two outputs: cover.png (1600x2560, KDP's 1:1.6) and cover_page.png
+(1764x2560, the book's 6.375x9.25 trim — bound into the PDF as page one).
 
 Run:  .venv/bin/python tools/make_cover.py
 """
@@ -13,7 +16,7 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 FIGURES = REPO / 'usd_exam_companion/figures'
 OUT = REPO / 'usd_exam_companion/cover'
 
-W, H = 1600, 2560
+EDITION = 'v0.10 beta edition'
 BG = (20, 23, 28)
 GREEN = (118, 185, 0)
 WHITE = (240, 242, 240)
@@ -24,7 +27,7 @@ bold = lambda s: ImageFont.truetype(str(FONT_DIR / 'DejaVuSans-Bold.ttf'), s)
 regular = lambda s: ImageFont.truetype(str(FONT_DIR / 'DejaVuSans.ttf'), s)
 
 
-def main():
+def make(W, H, out_name):
     OUT.mkdir(exist_ok=True)
     img = Image.new('RGB', (W, H), BG)
     d = ImageDraw.Draw(img)
@@ -69,11 +72,16 @@ def main():
 
     d.rectangle([120, H - 300, W - 120, H - 288], fill=GREEN)
     d.text((120, H - 240), 'David Khosid', font=bold(72), fill=WHITE)
-    d.text((W - 120, H - 228), 'v0.02 edition', font=regular(48),
+    d.text((W - 120, H - 228), EDITION, font=regular(48),
            fill=GRAY, anchor='ra')
 
-    img.save(OUT / 'cover.png')
-    print('wrote', OUT / 'cover.png')
+    img.save(OUT / out_name)
+    print('wrote', OUT / out_name)
+
+
+def main():
+    make(1600, 2560, 'cover.png')        # KDP marketplace cover (1:1.6)
+    make(1764, 2560, 'cover_page.png')   # book trim 6.375x9.25, page one
 
 
 if __name__ == '__main__':

@@ -4,31 +4,32 @@
 Sixty original questions, mixed across all eight domains in the official
 weighting, sized like the real exam. Rules of engagement: \textbf{90
 minutes}, closed book, no usdview. Mark uncertain questions and move on ---
-eliminate wrong options fast. Score yourself with the key in the next
-chapter, which also breaks your result down by domain, Certiverse-style.
+eliminate wrong options fast. Score yourself with the key on
+page~\pageref{ch:mockkey}, which also breaks your result down by domain,
+Certiverse-style.
 These questions are original: they match the exam's topics, difficulty, and
 style, not its content.
 
-\subsection*{Question 1}
+\Question{1}
 What is the correct LIVRPS strength ordering, strongest first?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Local, Inherits, VariantSets, References, Payload, Specializes
   \item B.\ Local, Inherits, Variants, References, Payload, Sublayers
   \item C.\ Layers, Inherits, VariantSets, References, Prims, Specializes
   \item D.\ Local, Instances, VariantSets, References, Payload, Specializes
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 2}
+\Question{2}
 A \texttt{.usd} file must be inspected to determine its encoding. Which
 statement is true?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{.usd} is always the binary crate encoding.
   \item B.\ \texttt{.usd} is always text; \texttt{.usdc} is the only binary form.
   \item C.\ The encoding can only be determined by a hex editor.
   \item D.\ \texttt{.usd} may contain either text or crate; \texttt{usdcat} reveals which.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 3}
+\Question{3}
 Given the following three layers, what is the composed value of
 \texttt{size} on \texttt{/Box}?
 
@@ -59,103 +60,103 @@ over "Box" {
 }
 \end{lstlisting}
 
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ 2
   \item B.\ 4
   \item C.\ 6
   \item D.\ The stage reports a conflict error.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 4}
+\Question{4}
 An exporter walks an instanced scene with \texttt{stage.Traverse()} and
 finds no meshes. Why?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Instanced geometry is stored compressed and cannot be traversed.
   \item B.\ Meshes inside instances lose their typed schema.
   \item C.\ Default traversal does not descend into instances; use a range with \texttt{Usd.TraverseInstanceProxies()}.
   \item D.\ The stage must be flattened before any traversal.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 5}
+\Question{5}
 Which statement about \texttt{kind} and the model hierarchy is correct?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Any prim with \texttt{kind = "component"} reports \texttt{IsModel() == True}.
   \item B.\ \texttt{subcomponent} prims are models like any other.
   \item C.\ Kinds are validated at authoring time; invalid hierarchies cannot be saved.
   \item D.\ A component under a parent with no group kind is not part of the model hierarchy.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 6}
+\Question{6}
 A time-varying review status must be stored on a prim. Where can it live?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{customData}, which supports time samples.
   \item B.\ \texttt{assetInfo}, updated per frame.
   \item C.\ An attribute --- metadata is never time-sampled.
   \item D.\ A relationship targeting a per-frame prim.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 7}
+\Question{7}
 \texttt{stage.MuteLayer(layer.identifier)} is best described as:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Deleting the layer's content from disk.
   \item B.\ Preventing the layer from being saved.
   \item C.\ Temporarily removing the layer from composition for this stage --- a debugging bisection tool.
   \item D.\ Disabling notifications for edits to that layer.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 8}
+\Question{8}
 An instance proxy prim (a child path inside an instance) supports which
 operation?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Authoring attribute values directly on it.
   \item B.\ Adding new child prims beneath it.
   \item C.\ Changing its composition arcs.
   \item D.\ Reading, traversal, and inspection --- authoring raises an error.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 9}
+\Question{9}
 Which network correctly drives \texttt{UsdPreviewSurface.diffuseColor} from
 a mesh's \texttt{displayColor} primvar?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ A \texttt{float3} primvar reader targeting
         \texttt{displayColor}, wired into the PBR's diffuse input.
   \item B.\ A \texttt{UsdUVTexture}'s \texttt{rgb} output feeding \texttt{diffuseColor}.
   \item C.\ \texttt{displayColor} connected directly into the Material's surface output.
   \item D.\ A \texttt{float2} reader (\texttt{varname = "st"}) feeding
         \texttt{diffuseColor}.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 10}
+\Question{10}
 What does \texttt{defaultPrim} layer metadata control?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Which prim composes when the layer is referenced or payloaded without an explicit prim path.
   \item B.\ The prim selected when the layer opens in usdview.
   \item C.\ The strongest prim in LIVRPS ordering.
   \item D.\ The prim whose transform anchors the stage.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 11}
+\Question{11}
 A reference is authored as
 \texttt{@anim.usda@ (offset = 20; scale = 2)}. A sample authored at source
 time 10 appears at which stage time?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ 15
   \item B.\ 25
   \item C.\ 40
   \item D.\ 60
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 12}
+\Question{12}
 For shipping an asset to an external vendor without exposing internal layer
 structure and paths, the standard preparation is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Convert every layer to usda for readability.
   \item B.\ Mute all internal layers before saving.
   \item C.\ Re-author all arcs as inherits.
   \item D.\ Flatten the stage (and package with \texttt{usdzip} if textures travel along).
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 13}
+\Question{13}
 Two layers are referenced by one prim:
 
 \noindent\textbf{propA.usda}
@@ -190,45 +191,45 @@ def Xform "World" {
 \end{lstlisting}
 
 What is the composed \texttt{displayColor} of \texttt{/World/Prop}?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ $(1, 0, 0)$ --- earlier reference entries are stronger.
   \item B.\ $(0, 0, 1)$ --- later reference entries are stronger.
   \item C.\ The average of both opinions.
   \item D.\ Undefined --- two references to the same prim are an error.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 14}
+\Question{14}
 \texttt{SdfChangeBlock} improves performance when:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ A single large attribute value is authored.
   \item B.\ The stage is opened with \texttt{LoadNone}.
   \item C.\ Many small Sdf-level edits are batched so change processing runs once.
   \item D.\ Reading composed values in a tight loop.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 15}
+\Question{15}
 Which file is, by specification, an uncompressed 64-byte-aligned zip
 archive intended for delivery rather than editing?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{.usda}
   \item B.\ \texttt{.usdc}
   \item C.\ \texttt{.usdz}
   \item D.\ \texttt{.usd}
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 16}
+\Question{16}
 A pipeline must select ``all vehicles'' via the kind mechanism. What is
 required?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Nothing --- any string assigned to \texttt{kind} is queryable everywhere.
   \item B.\ A custom typed schema deriving from \texttt{UsdTyped}.
   \item C.\ Recompiling USD with the new kind.
   \item D.\ A \texttt{plugInfo.json} registering it with a base kind of
         \texttt{component}, discoverable on the plugin path at every
         consuming site.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 17}
+\Question{17}
 A mesh has 4 points and one quad face. Which primvar is \emph{invalid}?
 
 \begin{lstlisting}
@@ -250,422 +251,424 @@ def Mesh "Plate" {
 }
 \end{lstlisting}
 
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{primvars:a} --- constant requires one value per point.
   \item B.\ \texttt{primvars:b} --- vertex requires one value per face.
   \item C.\ \texttt{primvars:c} --- uniform requires one value per face; this mesh has one face, not three.
   \item D.\ All three are valid.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 18}
+\Question{18}
 \texttt{Usd.Stage.Open()} without load arguments:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Loads no payloads (\texttt{LoadNone}).
   \item B.\ Loads all payloads (\texttt{LoadAll}).
   \item C.\ Loads payloads lazily on first traversal.
   \item D.\ Raises if the stage contains payloads.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 19}
+\Question{19}
 The exam objective ``edit an instanceProxy mesh without breaking
 instancing'' is satisfied by:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Editing the prototype's source asset (or an \texttt{over} on it in a stronger layer), so every instance updates.
   \item B.\ Setting the value on the proxy path with \texttt{Set()}.
   \item C.\ Calling \texttt{SetInstanceable(False)} on all instances first.
   \item D.\ Re-authoring the instance as a PointInstancer.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 20}
+\Question{20}
 \texttt{GetPropertyStack(time)} returns property specs ordered:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Alphabetically by layer identifier.
   \item B.\ Weakest opinion first.
   \item C.\ In file-modification order.
   \item D.\ Strongest opinion first.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 21}
+\Question{21}
 A studio publishes \texttt{Chair.usda}, a thin layer with
 \texttt{defaultPrim}, \texttt{kind}, and \texttt{assetInfo}, which payloads
 \texttt{contents.usda}. The main benefit is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Faster text parsing of the small file.
   \item B.\ The payload arc renders faster than a reference.
   \item C.\ Consumers depend on a stable interface while contents change underneath; heavy data stays deferrable.
   \item D.\ usdview opens thin layers in a special mode.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 22}
+\Question{22}
 Which call returns a layer's external dependencies (sublayer, reference,
 and payload asset paths) for a publish-time path validator?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{layer.GetCompositionAssetDependencies()}
   \item B.\ \texttt{stage.GetUsedLayers()}
   \item C.\ \texttt{layer.GetExternalRefs()}
   \item D.\ \texttt{Ar.GetResolver().GetDependencies(layer)}
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 23}
+\Question{23}
 \texttt{token} is the appropriate value type for:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Arbitrary user-facing text such as artist notes.
   \item B.\ Closed vocabularies the runtime switches on, like \texttt{visibility} or \texttt{purpose} values.
   \item C.\ File paths that the resolver must see.
   \item D.\ Pointers to other prims.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 24}
+\Question{24}
 After an exporter writes a layer with no \texttt{upAxis}, no
 \texttt{metersPerUnit}, and no \texttt{defaultPrim}, \texttt{usdchecker}
 reports:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ A parse failure.
   \item B.\ Nothing --- those are optional conveniences.
   \item C.\ A single combined warning about style.
   \item D.\ Three failed checks from the stage-metadata rules.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 25}
+\Question{25}
 The \texttt{inherits} arc differs from \texttt{specializes} in that:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Inherited opinions are stronger than variant opinions; specialized opinions are the weakest of all.
   \item B.\ Inherits works only inside one layer.
   \item C.\ Specializes cannot target class prims.
   \item D.\ Inherits is evaluated only at export time.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 26}
+\Question{26}
 A PointInstancer's \texttt{prototypes} relationship targets \texttt{/P/A}
 and \texttt{/P/B}. After \texttt{AddTarget("/P/C")} on that relationship,
 instance $i$ becomes a \texttt{C} by:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Setting \texttt{protoIndices[i] = 2}.
   \item B.\ Setting \texttt{protoIndices[i] = 3}.
   \item C.\ Adding \texttt{/P/C} to \texttt{ids}.
   \item D.\ Re-authoring \texttt{positions}.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 27}
+\Question{27}
 \texttt{purpose = "proxy"} on a subtree means:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ The subtree is invisible everywhere.
   \item B.\ Consumers selecting proxy purpose (typically interactive viewports) draw it; final-render traversals skip it.
   \item C.\ The subtree only draws when the prim is an instance proxy.
   \item D.\ The geometry is replaced by its bounding box.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 28}
+\Question{28}
 Why must a plug-in be built against the exact USD build that loads it?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Licensing requires matching versions.
   \item B.\ plugInfo.json embeds a checksum of the USD libraries.
   \item C.\ USD's C++ ABI changes between releases; mismatched builds fail to load (often silently).
   \item D.\ It does not --- plug-ins are version-independent.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 29}
+\Question{29}
 The composed stage shows the wrong value for one attribute. The fastest
 provenance tool is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Flattening and diffing the result.
   \item B.\ \texttt{attr.GetPropertyStack(time)} (or usdview's Layer Stack tab).
   \item C.\ Grepping every layer file for the property name.
   \item D.\ Re-exporting from the DCC.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 30}
+\Question{30}
 Round-tripping USD through a DCC and back, which information class is
 \emph{not} preserved by the foreign format and must be protected by
 pipeline design?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Point positions.
   \item B.\ Face counts.
   \item C.\ UV sets.
   \item D.\ Composition structure: references, variants, payloads, layer offsets.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 31}
+\Question{31}
 The importer pattern that keeps the original USD untouched is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Re-saving the original layer after merging.
   \item B.\ Flattening the import into the asset file.
   \item C.\ A new layer of \texttt{over}s composed above the original via sublayer or reference.
   \item D.\ Writing \texttt{def}s with the same names into the original.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 32}
+\Question{32}
 \texttt{quath[] orientations} on a PointInstancer stores:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Euler angles per prototype.
   \item B.\ Half-precision quaternions, one per instance, real part first.
   \item C.\ Full-precision quaternions, one per prototype.
   \item D.\ Rotation matrices per instance.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 33}
+\Question{33}
 An attribute has only time samples and no default. \texttt{attr.Get()}
 (no arguments) returns:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ The first sample.
   \item B.\ The sample at frame 0.
   \item C.\ Nothing --- Default-time queries read the default value, not samples.
   \item D.\ The average of all samples.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 34}
+\Question{34}
 With samples at $1 \mapsto 1$ and $11 \mapsto 11$ and the stage set to
 \emph{held} interpolation, \texttt{attr.Get(6)} returns:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ 6
   \item B.\ 1
   \item C.\ 11
   \item D.\ Nothing.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 35}
+\Question{35}
 Which is a correct statement about \texttt{usda} vs \texttt{usdc}?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ usdc supports features usda cannot represent.
   \item B.\ usda loads faster for large scenes.
   \item C.\ usdc files cannot be converted back to usda.
   \item D.\ They encode the same scene description; crate is memory-mapped and lazily read, text is diffable.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 36}
+\Question{36}
 \texttt{TF\_DEBUG=PLUG\_REGISTRATION} is the right first move when:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ A render is too dark.
   \item B.\ A schema/resolver/file-format plug-in seems not to load.
   \item C.\ Layer offsets misbehave.
   \item D.\ The exam asks about variant strength.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 37}
+\Question{37}
 A material must show per-prim colors on hundreds of instanced props without
 breaking instancing. The recommended design is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ A unique material per instance.
   \item B.\ De-instancing all props and baking vertex colors.
   \item C.\ One shared material whose \texttt{UsdPrimvarReader} consumes a per-prim primvar.
   \item D.\ A variant per color on each instance.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 38}
+\Question{38}
 \texttt{GeomSubset} face assignments become wrong when:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ The material is renamed.
   \item B.\ The mesh is moved in world space.
   \item C.\ Another subset family is added.
   \item D.\ The mesh topology changes (triangulation, deleted faces) --- subsets index faces by position.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 39}
+\Question{39}
 The codeless-schema deployment story is attractive because:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ It compiles faster than C++ schemas.
   \item B.\ It deploys as data (plugInfo + generated schema layer) with no ABI coupling --- nothing to compile per platform.
   \item C.\ It removes the need for \texttt{usdGenSchema}.
   \item D.\ It makes schemas editable by artists at runtime.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 40}
+\Question{40}
 A scene must place the same chair 40 times with full per-chair prim identity
 (selectable, bindable, transformable). The right mechanism is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ A PointInstancer with 40 entries.
   \item B.\ 40 prims each referencing the chair asset with \texttt{instanceable = true}.
   \item C.\ 40 flattened copies.
   \item D.\ One chair with 40 \texttt{xformOp} entries.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 41}
+\Question{41}
 \texttt{stage.SetDefaultPrim(prim)} is part of which workflow?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Making a layer cleanly referenceable by consumers.
   \item B.\ Speeding up traversal.
   \item C.\ Marking the prim as the strongest in LIVRPS.
   \item D.\ Pinning the camera in usdview.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 42}
+\Question{42}
 Sublayers vs references --- the deciding question is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Binary vs text encoding of the layers.
   \item B.\ Whether the data is animated.
   \item C.\ Number of files involved.
   \item D.\ Same namespace (opinions about the same prims) vs grafting a subtree under a new path.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 43}
+\Question{43}
 A validator walks \texttt{material:binding} relationships of an export and
 asserts each target lives under \texttt{defaultPrim}. This prevents:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Oversized usdz archives.
   \item B.\ Bindings that silently stop composing when the asset is referenced (the binding-outside-defaultPrim trap).
   \item C.\ Texture path case mismatches.
   \item D.\ Duplicate material names.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 44}
+\Question{44}
 Which statement about \texttt{visibility} is correct?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ It does not inherit; each prim must be hidden individually.
   \item B.\ It only affects proxy-purpose prims.
   \item C.\ \texttt{invisible} on an ancestor hides the whole subtree.
   \item D.\ It is metadata, not an attribute.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 45}
-\texttt{Usd.CollectionAPI.Apply(prim, "render")} records its application:
-\begin{itemize}[leftmargin=*]
+\Question{45}
+\texttt{CollectionAPI.Apply(prim, "render")} records its application:
+\begin{Choices}
   \item A.\ In the prim's \texttt{apiSchemas} metadata, queryable with \texttt{HasAPI}.
   \item B.\ In a sidecar JSON file.
   \item C.\ By changing the prim's type name.
   \item D.\ Only in memory; it cannot be saved.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 46}
+\Question{46}
 The three-layer repro shows \texttt{lite.usda} above \texttt{base.usda} in
 the property stack. Muting \texttt{lite.usda} makes the composed value fall
 back to \texttt{base.usda}'s. This demonstrates:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Layer muting re-resolves composition without the muted layer --- bisection in action.
   \item B.\ Muting deletes opinions permanently.
   \item C.\ The property stack is unordered.
   \item D.\ base.usda was corrupt.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 47}
+\Question{47}
 glTF interchange: which conversion concern is real?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ glTF stores n-gons natively; USD must triangulate.
   \item B.\ glTF cannot store UVs.
   \item C.\ USD and glTF share the same material model exactly.
   \item D.\ USD n-gons must be triangulated for glTF, and up-axis/units must be converted (glTF is Y-up, meters).
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 48}
+\Question{48}
 \texttt{UsdGeom.XformCommonAPI} exists because:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Raw \texttt{xformOp} stacks are flexible but easy to mis-order; the API authors and reads a canonical TRS form.
   \item B.\ Xformable prims cannot otherwise be moved.
   \item C.\ It is required for animation.
   \item D.\ It bypasses composition for speed.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 49}
+\Question{49}
 \texttt{inputs:file} on a \texttt{UsdUVTexture} shader should be typed:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{string}, because it is text.
   \item B.\ \texttt{asset}, so resolvers and dependency tooling see it.
   \item C.\ \texttt{token}, because paths are vocabulary.
   \item D.\ \texttt{rel}, targeting a texture prim.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 50}
+\Question{50}
 A nightly tool authors 50{,}000 attribute values one by one and is slow in
 change processing. The first fix to try:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Convert all layers to usda.
   \item B.\ Run with \texttt{TF\_DEBUG=USD\_CHANGES} permanently enabled.
   \item C.\ Re-open the stage between edits.
   \item D.\ Wrap the authoring loop in \texttt{Sdf.ChangeBlock} (writing at the Sdf level, reading only after).
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 51}
+\Question{51}
 Which file-format statement is true?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ File format plug-ins let USD read foreign formats as scene description; that is how usda/usdc themselves are wired in.
   \item B.\ New formats require forking the USD core.
   \item C.\ Only Pixar can add file formats.
   \item D.\ File format plug-ins run only in usdview.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 52}
+\Question{52}
 The variant trap: a stronger layer authors \texttt{color = "red"} as a local
 variant selection while a weaker variant authors \texttt{color = "blue"}.
 The stage resolves:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ blue --- variants beat locals.
   \item B.\ red --- Local selections beat selections authored inside variants.
   \item C.\ Whichever was authored last.
   \item D.\ Neither; selections conflict fatally.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 53}
+\Question{53}
 An OBJ face line \texttt{f 1 2 3 4} maps to USD as:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{faceVertexIndices = [1, 2, 3, 4]} --- indices copy over directly.
-  \item B.\ \texttt{faceVertexCounts = [4]}, \texttt{faceVertexIndices = [0, 1, 2, 3]} --- OBJ is 1-based, USD is 0-based.
+  \item B.\ \texttt{faceVertexCounts = [4]} and
+        \texttt{faceVertexIndices = [0, 1, 2, 3]} --- OBJ is 1-based, USD
+        0-based.
   \item C.\ Four separate one-vertex faces.
   \item D.\ \texttt{points = [1, 2, 3, 4]}.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 54}
+\Question{54}
 \texttt{invisibleIds} on a PointInstancer:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Deletes the listed instances from the arrays.
   \item B.\ Hides whole prototypes.
   \item C.\ Is only honored by usdview.
   \item D.\ Hides the listed instances without touching positions/protoIndices --- cheap and reversible.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 55}
+\Question{55}
 The Ar resolver's job, in one sentence:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Parse foreign file formats into prims.
   \item B.\ Map logical asset identifiers to concrete resolved paths, honoring context (site, version pinning).
   \item C.\ Generate renderable prims at render time.
   \item D.\ Validate exported assets.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 56}
+\Question{56}
 \texttt{color3f} vs \texttt{vector3f} vs \texttt{point3f} --- why does the
 role matter if all are three floats?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Roles drive transformation (points translate, vectors do not) and color management.
   \item B.\ It does not; they are interchangeable.
   \item C.\ Only \texttt{color3f} supports time samples.
   \item D.\ Roles change storage precision.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 57}
+\Question{57}
 A stage opens with warnings: ``Unresolved reference prim path \ldots\
 \texttt{<defaultPrim>}''. Production policy should be:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Ignore --- the stage opened, so composition succeeded.
   \item B.\ Fail the publish: the reference composed nothing; the missing content will surface downstream where it is harder to trace.
   \item C.\ Suppress warnings with a diagnostic delegate and continue.
   \item D.\ Convert the reference to a payload.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 58}
+\Question{58}
 \texttt{LightAPI} provides which inputs shared by every light type?
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{angle} and \texttt{radius}.
   \item B.\ \texttt{shadow:color} only.
   \item C.\ \texttt{intensity}, \texttt{color}, \texttt{exposure}.
   \item D.\ \texttt{focalLength} and \texttt{clippingRange}.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 59}
+\Question{59}
 For a per-show ``wear amount'' float needed on existing props across many
 shows, with documentation, fallbacks, and validation, the right mechanism
 is:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ \texttt{customData["wear"]} per prim.
   \item B.\ An applied API schema (e.g.\ generated from schema.usda, codeless).
   \item C.\ A new typed schema replacing Mesh.
   \item D.\ A naming convention in prim names.
-\end{itemize}
+\end{Choices}
 
-\subsection*{Question 60}
+\Question{60}
 Time budget reality check: the official exam gives roughly 90 minutes for
 60 questions. The strategy test-takers recommend:
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Eliminate clearly-wrong options fast, mark uncertain questions, and return --- about 90 seconds per question on average.
   \item B.\ Spend up to five minutes per question to be safe.
   \item C.\ Answer only questions you are sure about.
   \item D.\ Start from question 60 backwards.
-\end{itemize}
+\end{Choices}

@@ -12,11 +12,13 @@
 \end{Objectives}
 
 \begin{Resources}
-  \item Learn OpenUSD: Understanding Model Kinds
-  \item OpenUSD tutorial: Generating New Schema Classes (usdGenSchema)
-  \item Whitepaper: What Are OpenUSD Schemas?
-  \item OpenUSD API: PlugRegistry; Kind --- Extensible Categorization;
-        Ar (Asset Resolution); file format plug-ins
+  \item Learn OpenUSD: \href{https://docs.nvidia.com/learn-openusd/latest/beyond-basics/model-kinds.html}{Understanding Model Kinds}
+  \item OpenUSD tutorial: \href{https://openusd.org/release/tut_generating_new_schema.html}{Generating New Schema Classes (usdGenSchema)}
+  \item Whitepaper: \href{https://aousd.org/blog/explainer-series-for-developers-what-are-openusd-schemas/}{What Are OpenUSD Schemas?}
+  \item OpenUSD API: \href{https://openusd.org/release/api/class_plug_registry.html#plug_RegisteringPlugins}{PlugRegistry};
+        \href{https://openusd.org/release/api/kind_page_front.html}{Kind --- Extensible Categorization};
+        \href{https://openusd.org/release/api/ar_page_front.html}{Ar (Asset Resolution)};
+        \href{https://openusd.org/release/api/_sdf__page__file_format_plugin.html}{file format plug-ins}
 \end{Resources}
 
 \CheatSheetTitle
@@ -100,6 +102,12 @@ class SimJoint "SimJoint" (
         doc = "Maximum torque in Nm."
     )
 }
+\end{lstlisting}
+
+\noindent \ldots and, continuing in the same \texttt{schema.usda}, the
+applied flavor:
+
+\begin{lstlisting}
 class "WearAPI" (
     inherits = </APISchemaBase>
     customData = {
@@ -222,8 +230,9 @@ easy to get subtly wrong by hand.
 Three extension points get conflated on exams; the boundaries are clean:
 
 An \textbf{Ar resolver}\index{resolver} answers ``\emph{where} is asset
-\texttt{X}?'' --- it maps logical identifiers
-(\texttt{asset://props/chair?version=latest}) to concrete resolved paths,
+\texttt{X}?'' --- it maps a logical identifier such as
+\texttt{asset://props/chair?\allowbreak version=latest} to a concrete
+resolved path,
 honoring contexts (site, show, pin file). It never parses content.
 
 A \textbf{file format plug-in}\index{file format plug-in} answers ``how do I

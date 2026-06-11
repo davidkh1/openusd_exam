@@ -22,12 +22,14 @@
 \usepackage{bookmark}
 \usepackage{enumitem}
 \usepackage{fancyhdr}
+\usepackage{eso-pic}
 \usepackage{xcolor}
 \usepackage{makeidx}
 \makeindex
 
-\usepackage[bindingoffset=0.625in,
-            left=.5in, right=.5in,
+% PDF-first edition: symmetric margins, no binding gutter. For a print run,
+% restore bindingoffset=0.625in (and shrink left/right back to .5in).
+\usepackage[left=.8in, right=.8in,
             top=.8125in, bottom=.9375in,
             marginparwidth=27pt, marginparsep=5pt,
             paperwidth=6.375in, paperheight=9.25in]{geometry}
@@ -42,12 +44,16 @@
   pdfauthor={David Khosid}
 }
 
+% Running headers, LaTeX-Companion style: section number + title rides with
+% the page number on one line. On sectionless pages (practice chapters) the
+% chapter title stands in.
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE,RO]{\thepage}
-\fancyhead[LO]{\nouppercase{\rightmark}}
-\fancyhead[RE]{\nouppercase{\leftmark}}
+\fancyhead[L]{\textbf{\nouppercase{\rightmark}}}
+\fancyhead[R]{\textbf{\thepage}}
 \renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\quad #1}{\thechapter\quad #1}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\quad #1}}
 
 \setlist[itemize]{itemsep=2pt, topsep=3pt}
 

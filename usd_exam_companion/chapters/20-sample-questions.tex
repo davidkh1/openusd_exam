@@ -8,23 +8,25 @@ discarding distractors quickly is a trainable skill, and these questions
 are the training set.
 \end{FieldNote}
 
-\section*{Question 1}
+\noindent Answers, with worked explanations, begin on
+page~\pageref{sec:sample-key}.
+
+\Question{1}
 \noindent\textbf{Domain:} Composition\par
 \vspace{0.4em}
 \noindent\textbf{Question:} What is the primary purpose of the \texttt{defaultPrim} metadata in a USD layer?
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ It specifies which prim is used as the root when the layer is referenced.
   \item B.\ It defines which material is used as the default for geometry in the layer.
   \item C.\ It sets which timeCode is used as the default for animation in the layer.
   \item D.\ It specifies the default prim type when defining a new custom IsA schema.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 2}
+\Question{2}
 \noindent\textbf{Domain:} Composition\par
 \vspace{0.4em}
 \noindent\textbf{Question:} Given the following USD layer structure, what will be the final composed value of \texttt{xformOp:translate} on \texttt{/World/Chair} on a stage with root layer \texttt{scene.usda}?
-\subsection*{Layer snippets}
+\par\vspace{0.4em}\noindent\textbf{Layer snippets}
 \noindent\textbf{chair\_base.usda}
 \begin{lstlisting}
 #usda 1.0
@@ -56,124 +58,114 @@ def Xform "World" {
 }
 \end{lstlisting}
 
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ (0, 0, 0)
   \item B.\ (1, 0, 0)
   \item C.\ (0, 1, 0)
   \item D.\ (1, 1, 0)
-\end{itemize}
+\end{Choices}
 
-\section*{Question 3}
+\Question{3}
 \noindent\textbf{Domain:} Data Modeling\par
 \vspace{0.4em}
 \noindent\textbf{Question:} Which of the following attributes are required to properly define a \texttt{UsdGeomMesh} prim? \textit{(Select three options.)}
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ points
   \item B.\ faceVertexIndices
   \item C.\ primvars:displayColor
   \item D.\ faceVertexCounts
   \item E.\ normals
-\end{itemize}
+\end{Choices}
 
-\section*{Question 4}
+\Question{4}
 \noindent\textbf{Domain:} Data Modeling\par
 \vspace{0.4em}
 \noindent\textbf{Question:} You have a \texttt{UsdGeomMesh} with 1,000 vertices and 500 faces. The mesh uses \texttt{faceVertexIndices} to define triangular faces. What should be the length of the \texttt{faceVertexIndices} array?
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ 500 — one index per face
   \item B.\ 1,000 — one index per vertex
   \item C.\ 1,500 — three indices per triangular face
   \item D.\ 2,000 — four indices per face (including winding order)
-\end{itemize}
+\end{Choices}
 
-\section*{Question 5}
+\Question{5}
 \noindent\textbf{Domain:} Pipeline Development\par
 \vspace{0.4em}
 \noindent\textbf{Question:} When creating a procedural mesh in USD, which attributes must be kept synchronized to ensure the mesh remains valid? \textit{(Select two options.)}
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ points and extent — when vertex positions change
   \item B.\ faceVertexIndices and faceVertexCounts — when topology changes
   \item C.\ normals and primvars:displayColor — when shading changes
   \item D.\ purpose and visibility — when rendering properties change
-\end{itemize}
+\end{Choices}
 
-\section*{Question 6}
+\Question{6}
 \noindent\textbf{Domain:} Customizing USD\par
 \vspace{0.4em}
 \noindent\textbf{Question:} You want to create a custom USD schema that adds physics properties to geometry prims. Which base class should your schema inherit from?
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ UsdSchemaBase
   \item B.\ UsdTyped
   \item C.\ UsdAPISchemaBase
   \item D.\ UsdPhysicsBase
-\end{itemize}
+\end{Choices}
 
-\section*{Question 7}
+\Question{7}
 \noindent\textbf{Domain:} Pipeline Development\par
 \vspace{0.4em}
 \noindent\textbf{Question:} What are some primary advantages of using USD’s composition system in a production pipeline? \textit{(Select two options.)}
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Layers enable version control and tracking of asset changes across the pipeline.
   \item B.\ Layers allow multiple users to collaborate on the same scene without conflicts.
   \item C.\ Layers support nondestructive editing and make it easy to revert or update changes.
   \item D.\ Layers improve scene performance by optimizing data organization and access.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 8}
+\Question{8}
 \noindent\textbf{Domain:} Pipeline Development\par
 \vspace{0.4em}
 \noindent\textbf{Question:} When designing a USD-based pipeline, which architectural decisions are most critical for long-term success? \textit{(Select two options.)}
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Establishing clear and consistent asset naming conventions and directory structures.
   \item B.\ Implementing comprehensive error handling and validation at all pipeline boundaries.
   \item C.\ Defining an asset structure once that will meet all present and future requirements.
   \item D.\ Requiring that all content is always authored, managed, and encoded in USD format.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 9}
+\Question{9}
 \noindent\textbf{Domain:} Visualization\par
 \vspace{0.4em}
 \noindent\textbf{Question:} What is the primary purpose of the \texttt{UsdGeomImageable} schema in USD?
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ It defines common geometric properties for 3D objects.
   \item B.\ It provides common properties for objects that can be rendered.
   \item C.\ It manages how materials are assigned to geometric primitives.
   \item D.\ It defines properties for texture image data for 3D objects.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 10}
+\Question{10}
 \noindent\textbf{Domain:} Visualization\par
 \vspace{0.4em}
 \noindent\textbf{Question:} You want to create a material that can be easily customized with different colors and textures. Which USD shading approach would be most appropriate?
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ Create a single material with hardcoded shader parameters.
   \item B.\ Create a material with exposed parameters that can be overridden.
   \item C.\ Create separate materials for each color/texture combination.
   \item D.\ Use only the default material and modify it at render time.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 11}
+\Question{11}
 \noindent\textbf{Domain:} Content Aggregation\par
 \vspace{0.4em}
 \noindent\textbf{Question:} You reference a USD file with \texttt{metersPerUnit = 1.0} (meters) into a stage with \texttt{metersPerUnit = 0.01} (centimeters). What happens?
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ The USD runtime automatically rescales the referenced geometry to match the stage’s unit system.
   \item B.\ The referenced geometry appears 100 times smaller than intended, as USD does not automatically convert units.
   \item C.\ The referenced geometry appears 100 times larger than intended, due to USD scaling it up automatically.
   \item D.\ The referenced geometry is not composed onto the stage, because the unit systems do not match.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 12}
+\Question{12}
 \noindent\textbf{Domain:} Data Exchange\par
 \vspace{0.4em}
 \noindent\textbf{Question:} The following is a snippet of a USDA layer output by a new DCC for an exported asset. What is the error with the material binding in this export?
@@ -205,20 +197,19 @@ def Scope "Materials"
 }
 \end{lstlisting}
 
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ The use of \texttt{bindMaterialAs = "weakerThanDescendants"} is not valid in this context.
   \item B.\ The material binding is applied to the Mesh prim, but it should be applied to a Subset instead.
   \item C.\ The material binding is targeting a prim that is outside the hierarchy of the \texttt{defaultPrim}.
   \item D.\ The material binding data should go on the Material prim and target prims to bind to.
-\end{itemize}
+\end{Choices}
 
-\section*{Question 13}
+\Question{13}
 \noindent\textbf{Domain:} Debugging and Troubleshooting\par
 \vspace{0.4em}
 \noindent\textbf{Question:} An artist reports that \texttt{MyBox} no longer changes to blue even though they set \texttt{loftedColor="blue"} in \texttt{main.usda}. Explain why the box is no longer changing to blue.
 
-\subsection*{Layer snippets}
+\par\vspace{0.4em}\noindent\textbf{Layer snippets}
 \noindent\textbf{main.usda}
 \begin{lstlisting}
 #usda 1.0
@@ -292,10 +283,11 @@ def Xform "MyBox"
 }
 \end{lstlisting}
 
-\subsection*{Answer Choices}
-\begin{itemize}[leftmargin=*]
+\begin{Choices}
   \item A.\ The “red” selection in \texttt{contents.usda} is strongest and overrides all other opinions.
-  \item B.\ The direct local opinion for the \texttt{color} variant selection in \texttt{main.usda} is stronger than the opinion authored by \texttt{loftedColor}.
+  \item B.\ The local opinion for the \texttt{color} selection in
+        \texttt{main.usda} is stronger than the opinion authored by
+        \texttt{loftedColor}.
   \item C.\ \texttt{loftedColor} does not set \texttt{primvars:displayColor}, so changing it cannot affect color.
   \item D.\ Variant selections cannot be authored in \texttt{main.usda}; they must be authored in \texttt{MyBox.usda}.
-\end{itemize}
+\end{Choices}

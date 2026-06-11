@@ -26,7 +26,9 @@ Unit tests are a first-class part of this project. `tests/test_examples.py` extr
 .venv/bin/python -m pytest tests/ -v
 ```
 
-The venv (gitignored) has `usd-core` and `pytest`; recreate with `python3 -m venv .venv && .venv/bin/pip install usd-core pytest`. Every new listing lands with a test: add its file to `CHAPTER_LISTINGS` (per-chapter, in document order) and write a scenario test asserting what the book claims.
+The venv (gitignored) has `usd-core` and `pytest`; recreate with `python3 -m venv .venv && .venv/bin/pip install usd-core pytest`. Every new listing lands with a test: add its file to `CHAPTER_LISTINGS` (per-chapter, in document order) and write a scenario test asserting what the book claims. A filename listed twice means the book shows one file as two listing fragments; the fixture concatenates them back before testing.
+
+Every `lstlisting` is wrapped in an unbreakable box so examples never split across pages; a listing taller than the text column must be preceded by `\AllowListingBreak`. Margin tags (`\objref`) hyperlink each objective number to its Coverage-Map row (`\objrow` anchor) — new objectives need both ends. Recommended-resources bullets are `\href`-linked to official docs; verify any new URL resolves before printing it.
 
 usda gotcha learned by testing: every statement in a prim or variant body needs its own line — one-liner blocks like `"red" { over "Cube" ... }` fail to parse.
 
@@ -66,7 +68,7 @@ All `1x-*.tex` chapters follow this exact skeleton — keep it when editing or a
 % itemize with \item[$\square$] entries
 ```
 
-Practice questions (`20-sample-questions.tex`): `\section*{Question N}` plus `\addcontentsline{toc}{section}{Question N}`, a `\textbf{Domain:}` tag, optional `lstlisting` blocks holding small `.usda` snippets, then A–D answer choices as an itemize. Answers go in `21-answer-key.tex`, never inline with the question.
+Practice questions (`20-sample-questions.tex`): `\Question{N}` (compact header macro), a `\textbf{Domain:}` tag, optional `lstlisting` blocks holding small `.usda` snippets, then A–D answer choices in a `Choices` environment. Answers go in `21-answer-key.tex` (typeset as that chapter's closing "Answer Key" section), never inline with the question.
 
 ### Custom macros (`styles/`)
 

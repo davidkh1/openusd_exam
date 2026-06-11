@@ -8,13 +8,19 @@
 \end{Objectives}
 
 \begin{Resources}
-  \item Learn OpenUSD: Setting the Stage; Scene Description Blueprints;
-        Beyond the Basics
-  \item User guide: Rendering With USD
-  \item OpenUSD glossary: Gprim
-  \item OpenUSD API: UsdShadeMaterial; UsdShadeMaterialBindingAPI;
-        UsdGeomSubset; UsdLux (LightAPI, ShadowAPI, ShapingAPI, DistantLight);
-        Imageable Purpose
+  \item Learn OpenUSD: \href{https://docs.nvidia.com/learn-openusd/latest/stage-setting/index.html}{Setting the Stage};
+        \href{https://docs.nvidia.com/learn-openusd/latest/scene-description-blueprints/index.html}{Scene Description Blueprints};
+        \href{https://docs.nvidia.com/learn-openusd/latest/beyond-basics/index.html}{Beyond the Basics}
+  \item User guide: \href{https://openusd.org/release/user_guides/render_user_guide.html}{Rendering With USD}
+  \item OpenUSD glossary: \href{https://openusd.org/release/glossary.html#usdglossary-gprim}{Gprim}
+  \item OpenUSD API: \href{https://openusd.org/release/api/class_usd_shade_material.html}{UsdShadeMaterial};
+        \href{https://openusd.org/release/api/class_usd_shade_material_binding_a_p_i.html}{UsdShadeMaterialBindingAPI};
+        \href{https://openusd.org/release/api/class_usd_geom_subset.html}{UsdGeomSubset};
+        UsdLux (\href{https://openusd.org/release/api/class_usd_lux_light_a_p_i.html}{LightAPI},
+        \href{https://openusd.org/release/api/class_usd_lux_shadow_a_p_i.html}{ShadowAPI},
+        \href{https://openusd.org/release/api/class_usd_lux_shaping_a_p_i.html}{ShapingAPI},
+        \href{https://openusd.org/release/api/class_usd_lux_distant_light.html}{DistantLight});
+        \href{https://openusd.org/release/api/usd_geom_page_front.html#UsdGeom_ImageablePurpose}{Imageable Purpose}
 \end{Resources}
 
 \CheatSheetTitle
@@ -52,6 +58,7 @@ The exam's flagship task in this domain --- a UsdPreviewSurface whose diffuse
 color comes from each mesh's \texttt{displayColor} primvar. Two plates, two
 colors, \emph{one} material:
 
+\AllowListingBreak
 \begin{lstlisting}
 #usda 1.0
 (
@@ -167,6 +174,7 @@ textured: \texttt{UsdUVTexture} reads an image, steered by a \texttt{float2}
 primvar reader for UVs. The same scene carries a camera and a light ---
 prims like everything else:
 
+\AllowListingBreak
 \begin{lstlisting}
 #usda 1.0
 ( defaultPrim = "Scene" )

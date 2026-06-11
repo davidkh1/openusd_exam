@@ -9,10 +9,13 @@
 \end{Objectives}
 
 \begin{Resources}
-  \item Learn OpenUSD: Understanding Model Kinds; Asset Structure Principles
-        and Content Aggregation; Asset Modularity and Instancing
-  \item OpenUSD API: Scenegraph Instancing; Kind --- The Core Kind Hierarchy;
-        Model Hierarchy; UsdGeomPointInstancer
+  \item Learn OpenUSD: \href{https://docs.nvidia.com/learn-openusd/latest/beyond-basics/model-kinds.html}{Understanding Model Kinds};
+        \href{https://docs.nvidia.com/learn-openusd/latest/asset-structure/index.html}{Asset Structure Principles and Content Aggregation};
+        \href{https://docs.nvidia.com/learn-openusd/latest/asset-modularity-instancing/index.html}{Asset Modularity and Instancing}
+  \item OpenUSD API: \href{https://openusd.org/release/api/_usd__page__scenegraph_instancing.html}{Scenegraph Instancing};
+        \href{https://openusd.org/release/api/kind_page_front.html#kind_coreKinds}{Kind --- The Core Kind Hierarchy};
+        \href{https://openusd.org/release/api/_usd__page__properties_of_scene_description.html#Usd_ModelHierarchy}{Model Hierarchy};
+        \href{https://openusd.org/release/api/class_usd_geom_point_instancer.html}{UsdGeomPointInstancer}
 \end{Resources}
 
 \CheatSheetTitle
@@ -148,16 +151,6 @@ def PointInstancer "Scatter" {
 }
 \end{lstlisting}
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.9\linewidth]{figures/c11_scatter.png}
-  \caption{The PointInstancer above, rendered with \texttt{usdrecord}: four
-  entries in \texttt{positions}, three instances drawn ---
-  \texttt{invisibleIds = [2]} hides the third (the bush that would sit at
-  $x{=}4$) without touching any array.}
-  \label{fig:scatter}
-\end{figure}
-
 Per-instance variation comes from more parallel arrays --- orientations
 (half-precision quaternions, real part first) and scales, one entry per
 instance, authorable as an override layer over the scatter:
@@ -191,6 +184,16 @@ pi.GetProtoIndicesAttr().Set([0, 1, 0, 2])        # instance 3 is a Fern
 \texttt{invisibleIds} --- by default an instance's id \emph{is} its array
 position, unless an explicit \texttt{ids} array says otherwise. No geometry
 is deleted, no arrays re-authored, and unhiding is removing the id again.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figures/c11_scatter.png}
+  \caption{The PointInstancer above, rendered with \texttt{usdrecord}: four
+  entries in \texttt{positions}, three instances drawn ---
+  \texttt{invisibleIds = [2]} hides the third (the bush that would sit at
+  $x{=}4$) without touching any array.}
+  \label{fig:scatter}
+\end{figure}
 
 \begin{DeepDive}
 \objref{1.2}Choosing a mechanism is a scale question. Scenegraph instancing keeps full

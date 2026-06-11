@@ -10,12 +10,16 @@
 \end{Objectives}
 
 \begin{Resources}
-  \item Learn OpenUSD: Setting the Stage; Scene Description Blueprints; Beyond
-        the Basics
-  \item User guide: Rendering --- Working With Primvars
-  \item OpenUSD glossary: TimeCode; Layer Offset; List Editing; Primvar
-  \item OpenUSD API: Sdf datatypes; UsdGeomPrimvar; Boundable; XformCache;
-        UsdAttribute interpolation
+  \item Learn OpenUSD: \href{https://docs.nvidia.com/learn-openusd/latest/stage-setting/index.html}{Setting the Stage};
+        \href{https://docs.nvidia.com/learn-openusd/latest/scene-description-blueprints/index.html}{Scene Description Blueprints};
+        \href{https://docs.nvidia.com/learn-openusd/latest/beyond-basics/index.html}{Beyond the Basics}
+  \item User guide: \href{https://openusd.org/release/user_guides/render_user_guide.html#working-with-primvars}{Rendering --- Working With Primvars}
+  \item OpenUSD glossary: \href{https://openusd.org/release/glossary.html#usdglossary-timecode}{TimeCode}; \href{https://openusd.org/release/glossary.html#layer-offset}{Layer Offset}; \href{https://openusd.org/release/glossary.html#list-editing}{List Editing}; \href{https://openusd.org/release/glossary.html#usdglossary-primvar}{Primvar}
+  \item OpenUSD API: \href{https://openusd.org/release/api/_usd__page__datatypes.html}{Sdf datatypes};
+        \href{https://openusd.org/release/api/class_usd_geom_primvar.html}{UsdGeomPrimvar};
+        \href{https://openusd.org/release/api/class_usd_geom_boundable.html}{Boundable};
+        \href{https://openusd.org/release/api/class_usd_geom_xform_cache.html}{XformCache};
+        \href{https://openusd.org/release/api/class_usd_attribute.html#Usd_AttributeInterpolation}{UsdAttribute interpolation}
 \end{Resources}
 
 \CheatSheetTitle
@@ -103,7 +107,7 @@ Figure~\ref{fig:propspanel} is this exact prim in usdview's property panel.
   \centering
   \begin{tikzpicture}
     \node[anchor=south west, inner sep=0] (img)
-      {\includegraphics[trim={30 0 0 0}, clip, width=0.95\linewidth]{figures/c14_usdview_props.png}};
+      {\includegraphics[trim={30 0 0 0}, clip, width=0.92\linewidth]{figures/c14_usdview_props.png}};
     \begin{scope}[x={(img.south east)}, y={(img.north west)}]
       \node[notetext, draw=arcRef, fill=white, rounded corners=1pt,
             text width=0.27\linewidth, align=left] (rel) at (0.74,0.37)

@@ -281,3 +281,23 @@ Remaining (human, launch-time):
    tradeoff, accepted: legal free copies will circulate, and KDP's
    "freely available content" policy may need the Amazon listing to offer
    differentiation (e.g., latest edition first on Amazon).
+8. **PDF-first page architecture** (2026-06-11, second pass): symmetric
+   .8in margins, `bindingoffset` removed (restore for a print run); the
+   front cover is bound in as page one (`cover/cover_page.png`, rendered at
+   the 6.375x9.25 trim ratio by `tools/make_cover.py`, which still emits the
+   1:1.6 `cover.png` for KDP). Running headers show "section-number title"
+   + page on one line (chapter title stands in on sectionless pages).
+9. **Practice chapters merged with their keys** (2026-06-11): the former
+   key chapters are now end-of-chapter `\section*`s ("Answer Key", "Answer
+   Key and Domain Scoring") with "answers begin on page X" pointers at each
+   chapter opening. Files stay separate (`21-`, `24-`), inputs unchanged.
+10. **Everything clickable** (2026-06-11): margin objective tags link to
+    their Coverage-Map rows (`\objref` -> `\objrow` anchors, all 55);
+    every Recommended-resources bullet links to its official page (URLs
+    lifted from the study guide's own link annotations; all return 200).
+11. **Listings never split across pages** (2026-06-11): every `lstlisting`
+    is boxed whole; a listing taller than the text column opts out with
+    `\AllowListingBreak` on the line before. The two page-height USDA
+    networks in ch17 are the only opt-outs; ch12's 32-line schema listing
+    was instead split at its semantic seam (typed | applied schema) and the
+    test fixture re-appends fragments mapped to the same filename.

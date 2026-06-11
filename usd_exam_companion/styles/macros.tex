@@ -9,13 +9,37 @@
 % Margin tag tying a passage to numbered study-guide objectives, e.g.
 % \objref{1.6} or \objref{1.10, 2.5}. Bare numbers; domain prefixes implied
 % by the guide's numbering (1=Composition ... 8=Visualization).
+% Each number is a link to its row in the Coverage Map (\objrow anchors).
+\makeatletter
+\newcommand{\obj@strip}[1]{\edef\obj@n{\zap@space#1 \@empty}}
 \newcommand{\objref}[1]{\marginnote{%
-  \raggedright\scriptsize\sffamily\color{black!55}#1}}
+  \raggedright\scriptsize\sffamily
+  \def\obj@sep{}%
+  \@for\obj@n:=#1\do{%
+    \expandafter\obj@strip\expandafter{\obj@n}%
+    \obj@sep\hyperlink{obj:\obj@n}{\textcolor{black!55}{\obj@n}}%
+    \def\obj@sep{, }}%
+}}
+\makeatother
+% Coverage-map row anchor: prints the objective number and registers the
+% jump target for \objref, raised a line so the row lands below the jump.
+\newcommand{\objrow}[1]{%
+  \raisebox{1.2\baselineskip}[0pt][0pt]{\hypertarget{obj:#1}{}}#1}
 
 % Connector for the "code -> produces -> scene description" idiom (adopted
 % from the official OpenUSD tutorials). Mark authored lines in the second
 % listing by starting them with ";;".
 \newcommand{\produces}{\par\nopagebreak\noindent\textit{\small produces}\par\nopagebreak\vspace{0.1em}}
+
+% Compact question header for the practice chapters (replaces the roomy
+% starred subsections) and a bullet-free, tight answer-choice list — the
+% A./B./C. labels make bullets redundant.
+\newcommand{\Question}[1]{\par\vspace{0.9em plus 0.3em}%
+  \noindent\textbf{Question #1}\par\nopagebreak\vspace{0.2em}\ignorespaces}
+\newenvironment{Choices}
+  {\begin{itemize}[leftmargin=1.5em, label={}, itemsep=1pt, topsep=2pt,
+    parsep=0pt]}
+  {\end{itemize}}
 
 \newcommand{\CheatSheetTitle}{\section*{Cheat Sheet (one page)}\addcontentsline{toc}{section}{Cheat Sheet}}
 \newcommand{\DrillsTitle}{\section*{Exercises and Drills}\addcontentsline{toc}{section}{Exercises and Drills}}

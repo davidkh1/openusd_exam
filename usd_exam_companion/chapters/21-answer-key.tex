@@ -1,15 +1,18 @@
-\chapter{Sample Questions Answer Key}
+\clearpage
+\section*{Answer Key}
+\addcontentsline{toc}{section}{Answer Key}
+\label{sec:sample-key}
 
 Every composition scenario in this key was verified by composing the actual
 layers with OpenUSD and inspecting the result --- not by reasoning alone.
 
-\subsection*{Question 1 --- A}
+\Question{1 --- A}
 \texttt{defaultPrim}\index{defaultPrim} is layer metadata naming the prim that
 consumers compose when they reference or payload the layer \emph{without}
 specifying a prim path. It has nothing to do with materials, timeCodes, or
 schema definitions.
 
-\subsection*{Question 2 --- C: (0, 1, 0)}
+\Question{2 --- C: (0, 1, 0)}
 LIVRPS\index{LIVRPS}: the \emph{Local} opinion in \texttt{scene.usda} is
 stronger than anything brought in by the two \emph{References}, so $(0,1,0)$
 wins. Between the references themselves, the earlier list entry
@@ -39,63 +42,64 @@ at the four candidate positions.
   \label{fig:key-q2}
 \end{figure}
 
-\subsection*{Question 3 --- A, B, D}
+\Question{3 --- A, B, D}
 Topology lives in three attributes: \texttt{points},
 \texttt{faceVertexCounts}, and \texttt{faceVertexIndices} --- counts say how
 many vertices each face consumes, indices say which ones. \texttt{normals}
 can be computed (or come from subdivision), and
 \texttt{primvars:\allowbreak displayColor} is cosmetic --- both optional.
 
-\subsection*{Question 4 --- C: 1,500}
-500 triangular faces $\times$ 3 indices each $=$ 1,500 entries.
-(\texttt{faceVertexCounts} would hold 500 entries, each equal to 3.)
+\Question{4 --- C: 1,500}
+Each of the 500 triangular faces consumes three indices:
+$500 \times 3 = 1{,}500$ entries. \texttt{faceVertexCounts} would hold 500
+entries, each equal to 3.
 
-\subsection*{Question 5 --- A, B}
+\Question{5 --- A, B}
 Move points $\Rightarrow$ recompute \texttt{extent}\index{extent} (bounds are
 authored, not derived on the fly). Change topology $\Rightarrow$ keep
 \texttt{faceVertexCounts} consistent with \texttt{faceVertexIndices}. The
 pairs in C and D are independent properties, not synchronization invariants.
 
-\subsection*{Question 6 --- C}
+\Question{6 --- C}
 Adding properties to \emph{existing} prim types is what applied API
 schemas\index{API schema} do, and those derive from
 \texttt{UsdAPISchemaBase}. \texttt{UsdTyped} is the base for IsA (typed)
 schemas that define new prim types; \texttt{UsdSchemaBase} is the common
 ancestor you do not subclass directly; \texttt{UsdPhysicsBase} does not exist.
 
-\subsection*{Question 7 --- B, C}
+\Question{7 --- B, C}
 Composition's headline wins are collaboration (people own separate layers of
 the same stage without write conflicts) and nondestructive overrides (stronger
 opinions on top, original data intact). A confuses USD with version control
 --- any file format can live in git. D inverts reality: more layers add
 composition cost; they do not optimize access.
 
-\subsection*{Question 8 --- A, B}
+\Question{8 --- A, B}
 Naming/structure conventions and validation at boundaries are what keep a
 pipeline alive as it grows. C is the trap answer: asset structures evolve, so
 design for change rather than pretending to finalize one up front. D is dogma
 --- production pipelines exchange with DCC-native formats all the time.
 
-\subsection*{Question 9 --- B}
+\Question{9 --- B}
 The \texttt{UsdGeomImageable}\index{UsdGeomImageable} schema carries what
 every \emph{renderable} prim needs: \texttt{visibility}, \texttt{purpose},
 and primvar plumbing. Concrete geometric properties live further down the
 hierarchy (\texttt{Boundable}, \texttt{Gprim}); material assignment belongs to
 \texttt{UsdShade} (\texttt{MaterialBindingAPI}).
 
-\subsection*{Question 10 --- B}
+\Question{10 --- B}
 Expose the parameters you expect to vary as inputs on the material's public
 interface; consumers then override them per use, instead of forking a material
 per combination (C) or hardcoding values (A).
 
-\subsection*{Question 11 --- B}
+\Question{11 --- B}
 \texttt{metersPerUnit}\index{metersPerUnit} is descriptive metadata; USD
 performs \emph{no} automatic unit conversion when referencing. Meter-unit
 geometry (1.0) interpreted inside a centimeter-unit stage (0.01) reads
 100$\times$ too small. Correcting it is the referencing pipeline's job ---
 typically a corrective scale on the referencing prim.
 
-\subsection*{Question 12 --- C}
+\Question{12 --- C}
 The export parses cleanly --- verified --- but \texttt{defaultPrim} is
 \texttt{World}, and the binding targets \texttt{/Materials/metal}, which lives
 \emph{outside} that hierarchy. Reference this layer into another stage and
@@ -103,7 +107,7 @@ The export parses cleanly --- verified --- but \texttt{defaultPrim} is
 \texttt{bindMaterialAs} metadata (A) is legal on a binding relationship;
 geom subsets (B) are optional, not required; D inverts the binding model.
 
-\subsection*{Question 13 --- B}
+\Question{13 --- B}
 Composed and verified: the stage \emph{does} resolve
 \texttt{loftedColor = blue}, yet the cube stays red. The artist's local
 \texttt{over} on \texttt{Cube} in \texttt{main.usda} authors a direct
