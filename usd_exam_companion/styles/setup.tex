@@ -53,3 +53,9 @@
 
 % Avoid fancyhdr headheight warnings
 \setlength{\headheight}{14pt}
+
+% Book-grade page breaking: discourage widows/orphans; with boxes, figures,
+% and ruled drills on most pages, ragged bottom beats stretched whitespace.
+\widowpenalty=9000
+\clubpenalty=9000
+\raggedbottom

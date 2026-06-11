@@ -23,9 +23,9 @@ A \texttt{.usd} file must be inspected to determine its encoding. Which
 statement is true?
 \begin{itemize}[leftmargin=*]
   \item A.\ \texttt{.usd} is always the binary crate encoding.
-  \item B.\ \texttt{.usd} may contain either text or crate; \texttt{usdcat} reveals which.
-  \item C.\ \texttt{.usd} is always text; \texttt{.usdc} is the only binary form.
-  \item D.\ The encoding can only be determined by a hex editor.
+  \item B.\ \texttt{.usd} is always text; \texttt{.usdc} is the only binary form.
+  \item C.\ The encoding can only be determined by a hex editor.
+  \item D.\ \texttt{.usd} may contain either text or crate; \texttt{usdcat} reveals which.
 \end{itemize}
 
 \subsection*{Question 3}
@@ -71,8 +71,8 @@ An exporter walks an instanced scene with \texttt{stage.Traverse()} and
 finds no meshes. Why?
 \begin{itemize}[leftmargin=*]
   \item A.\ Instanced geometry is stored compressed and cannot be traversed.
-  \item B.\ Default traversal does not descend into instances; use a range with \texttt{Usd.TraverseInstanceProxies()}.
-  \item C.\ Meshes inside instances lose their typed schema.
+  \item B.\ Meshes inside instances lose their typed schema.
+  \item C.\ Default traversal does not descend into instances; use a range with \texttt{Usd.TraverseInstanceProxies()}.
   \item D.\ The stage must be flattened before any traversal.
 \end{itemize}
 
@@ -80,9 +80,9 @@ finds no meshes. Why?
 Which statement about \texttt{kind} and the model hierarchy is correct?
 \begin{itemize}[leftmargin=*]
   \item A.\ Any prim with \texttt{kind = "component"} reports \texttt{IsModel() == True}.
-  \item B.\ A component under a parent with no group kind is not part of the model hierarchy.
-  \item C.\ \texttt{subcomponent} prims are models like any other.
-  \item D.\ Kinds are validated at authoring time; invalid hierarchies cannot be saved.
+  \item B.\ \texttt{subcomponent} prims are models like any other.
+  \item C.\ Kinds are validated at authoring time; invalid hierarchies cannot be saved.
+  \item D.\ A component under a parent with no group kind is not part of the model hierarchy.
 \end{itemize}
 
 \subsection*{Question 6}
@@ -98,8 +98,8 @@ A time-varying review status must be stored on a prim. Where can it live?
 \texttt{stage.MuteLayer(layer.identifier)} is best described as:
 \begin{itemize}[leftmargin=*]
   \item A.\ Deleting the layer's content from disk.
-  \item B.\ Temporarily removing the layer from composition for this stage --- a debugging bisection tool.
-  \item C.\ Preventing the layer from being saved.
+  \item B.\ Preventing the layer from being saved.
+  \item C.\ Temporarily removing the layer from composition for this stage --- a debugging bisection tool.
   \item D.\ Disabling notifications for edits to that layer.
 \end{itemize}
 
@@ -108,18 +108,18 @@ An instance proxy prim (a child path inside an instance) supports which
 operation?
 \begin{itemize}[leftmargin=*]
   \item A.\ Authoring attribute values directly on it.
-  \item B.\ Reading, traversal, and inspection --- authoring raises an error.
-  \item C.\ Adding new child prims beneath it.
-  \item D.\ Changing its composition arcs.
+  \item B.\ Adding new child prims beneath it.
+  \item C.\ Changing its composition arcs.
+  \item D.\ Reading, traversal, and inspection --- authoring raises an error.
 \end{itemize}
 
 \subsection*{Question 9}
 Which network correctly drives \texttt{UsdPreviewSurface.diffuseColor} from
 a mesh's \texttt{displayColor} primvar?
 \begin{itemize}[leftmargin=*]
-  \item A.\ A \texttt{UsdUVTexture}'s \texttt{rgb} output feeding \texttt{diffuseColor}.
-  \item B.\ A \texttt{float3} primvar reader targeting
+  \item A.\ A \texttt{float3} primvar reader targeting
         \texttt{displayColor}, wired into the PBR's diffuse input.
+  \item B.\ A \texttt{UsdUVTexture}'s \texttt{rgb} output feeding \texttt{diffuseColor}.
   \item C.\ \texttt{displayColor} connected directly into the Material's surface output.
   \item D.\ A \texttt{float2} reader (\texttt{varname = "st"}) feeding
         \texttt{diffuseColor}.
@@ -150,9 +150,9 @@ For shipping an asset to an external vendor without exposing internal layer
 structure and paths, the standard preparation is:
 \begin{itemize}[leftmargin=*]
   \item A.\ Convert every layer to usda for readability.
-  \item B.\ Flatten the stage (and package with \texttt{usdzip} if textures travel along).
-  \item C.\ Mute all internal layers before saving.
-  \item D.\ Re-author all arcs as inherits.
+  \item B.\ Mute all internal layers before saving.
+  \item C.\ Re-author all arcs as inherits.
+  \item D.\ Flatten the stage (and package with \texttt{usdzip} if textures travel along).
 \end{itemize}
 
 \subsection*{Question 13}
@@ -201,8 +201,8 @@ What is the composed \texttt{displayColor} of \texttt{/World/Prop}?
 \texttt{SdfChangeBlock} improves performance when:
 \begin{itemize}[leftmargin=*]
   \item A.\ A single large attribute value is authored.
-  \item B.\ Many small Sdf-level edits are batched so change processing runs once.
-  \item C.\ The stage is opened with \texttt{LoadNone}.
+  \item B.\ The stage is opened with \texttt{LoadNone}.
+  \item C.\ Many small Sdf-level edits are batched so change processing runs once.
   \item D.\ Reading composed values in a tight loop.
 \end{itemize}
 
@@ -221,11 +221,11 @@ A pipeline must select ``all vehicles'' via the kind mechanism. What is
 required?
 \begin{itemize}[leftmargin=*]
   \item A.\ Nothing --- any string assigned to \texttt{kind} is queryable everywhere.
-  \item B.\ A \texttt{plugInfo.json} registering it with a base kind of
+  \item B.\ A custom typed schema deriving from \texttt{UsdTyped}.
+  \item C.\ Recompiling USD with the new kind.
+  \item D.\ A \texttt{plugInfo.json} registering it with a base kind of
         \texttt{component}, discoverable on the plugin path at every
         consuming site.
-  \item C.\ A custom typed schema deriving from \texttt{UsdTyped}.
-  \item D.\ Recompiling USD with the new kind.
 \end{itemize}
 
 \subsection*{Question 17}
@@ -270,8 +270,8 @@ def Mesh "Plate" {
 The exam objective ``edit an instanceProxy mesh without breaking
 instancing'' is satisfied by:
 \begin{itemize}[leftmargin=*]
-  \item A.\ Setting the value on the proxy path with \texttt{Set()}.
-  \item B.\ Editing the prototype's source asset (or an \texttt{over} on it in a stronger layer), so every instance updates.
+  \item A.\ Editing the prototype's source asset (or an \texttt{over} on it in a stronger layer), so every instance updates.
+  \item B.\ Setting the value on the proxy path with \texttt{Set()}.
   \item C.\ Calling \texttt{SetInstanceable(False)} on all instances first.
   \item D.\ Re-authoring the instance as a PointInstancer.
 \end{itemize}
@@ -280,9 +280,9 @@ instancing'' is satisfied by:
 \texttt{GetPropertyStack(time)} returns property specs ordered:
 \begin{itemize}[leftmargin=*]
   \item A.\ Alphabetically by layer identifier.
-  \item B.\ Strongest opinion first.
-  \item C.\ Weakest opinion first.
-  \item D.\ In file-modification order.
+  \item B.\ Weakest opinion first.
+  \item C.\ In file-modification order.
+  \item D.\ Strongest opinion first.
 \end{itemize}
 
 \subsection*{Question 21}
@@ -291,8 +291,8 @@ A studio publishes \texttt{Chair.usda}, a thin layer with
 \texttt{contents.usda}. The main benefit is:
 \begin{itemize}[leftmargin=*]
   \item A.\ Faster text parsing of the small file.
-  \item B.\ Consumers depend on a stable interface while contents change underneath; heavy data stays deferrable.
-  \item C.\ The payload arc renders faster than a reference.
+  \item B.\ The payload arc renders faster than a reference.
+  \item C.\ Consumers depend on a stable interface while contents change underneath; heavy data stays deferrable.
   \item D.\ usdview opens thin layers in a special mode.
 \end{itemize}
 
@@ -321,9 +321,9 @@ After an exporter writes a layer with no \texttt{upAxis}, no
 reports:
 \begin{itemize}[leftmargin=*]
   \item A.\ A parse failure.
-  \item B.\ Three failed checks from the stage-metadata rules.
-  \item C.\ Nothing --- those are optional conveniences.
-  \item D.\ A single combined warning about style.
+  \item B.\ Nothing --- those are optional conveniences.
+  \item C.\ A single combined warning about style.
+  \item D.\ Three failed checks from the stage-metadata rules.
 \end{itemize}
 
 \subsection*{Question 25}
@@ -359,8 +359,8 @@ instance $i$ becomes a \texttt{C} by:
 Why must a plug-in be built against the exact USD build that loads it?
 \begin{itemize}[leftmargin=*]
   \item A.\ Licensing requires matching versions.
-  \item B.\ USD's C++ ABI changes between releases; mismatched builds fail to load (often silently).
-  \item C.\ plugInfo.json embeds a checksum of the USD libraries.
+  \item B.\ plugInfo.json embeds a checksum of the USD libraries.
+  \item C.\ USD's C++ ABI changes between releases; mismatched builds fail to load (often silently).
   \item D.\ It does not --- plug-ins are version-independent.
 \end{itemize}
 
@@ -380,17 +380,17 @@ Round-tripping USD through a DCC and back, which information class is
 pipeline design?
 \begin{itemize}[leftmargin=*]
   \item A.\ Point positions.
-  \item B.\ Composition structure: references, variants, payloads, layer offsets.
-  \item C.\ Face counts.
-  \item D.\ UV sets.
+  \item B.\ Face counts.
+  \item C.\ UV sets.
+  \item D.\ Composition structure: references, variants, payloads, layer offsets.
 \end{itemize}
 
 \subsection*{Question 31}
 The importer pattern that keeps the original USD untouched is:
 \begin{itemize}[leftmargin=*]
   \item A.\ Re-saving the original layer after merging.
-  \item B.\ A new layer of \texttt{over}s composed above the original via sublayer or reference.
-  \item C.\ Flattening the import into the asset file.
+  \item B.\ Flattening the import into the asset file.
+  \item C.\ A new layer of \texttt{over}s composed above the original via sublayer or reference.
   \item D.\ Writing \texttt{def}s with the same names into the original.
 \end{itemize}
 
@@ -427,9 +427,9 @@ With samples at $1 \mapsto 1$ and $11 \mapsto 11$ and the stage set to
 Which is a correct statement about \texttt{usda} vs \texttt{usdc}?
 \begin{itemize}[leftmargin=*]
   \item A.\ usdc supports features usda cannot represent.
-  \item B.\ They encode the same scene description; crate is memory-mapped and lazily read, text is diffable.
-  \item C.\ usda loads faster for large scenes.
-  \item D.\ usdc files cannot be converted back to usda.
+  \item B.\ usda loads faster for large scenes.
+  \item C.\ usdc files cannot be converted back to usda.
+  \item D.\ They encode the same scene description; crate is memory-mapped and lazily read, text is diffable.
 \end{itemize}
 
 \subsection*{Question 36}
@@ -446,8 +446,8 @@ A material must show per-prim colors on hundreds of instanced props without
 breaking instancing. The recommended design is:
 \begin{itemize}[leftmargin=*]
   \item A.\ A unique material per instance.
-  \item B.\ One shared material whose \texttt{UsdPrimvarReader} consumes a per-prim primvar.
-  \item C.\ De-instancing all props and baking vertex colors.
+  \item B.\ De-instancing all props and baking vertex colors.
+  \item C.\ One shared material whose \texttt{UsdPrimvarReader} consumes a per-prim primvar.
   \item D.\ A variant per color on each instance.
 \end{itemize}
 
@@ -455,9 +455,9 @@ breaking instancing. The recommended design is:
 \texttt{GeomSubset} face assignments become wrong when:
 \begin{itemize}[leftmargin=*]
   \item A.\ The material is renamed.
-  \item B.\ The mesh topology changes (triangulation, deleted faces) --- subsets index faces by position.
-  \item C.\ The mesh is moved in world space.
-  \item D.\ Another subset family is added.
+  \item B.\ The mesh is moved in world space.
+  \item C.\ Another subset family is added.
+  \item D.\ The mesh topology changes (triangulation, deleted faces) --- subsets index faces by position.
 \end{itemize}
 
 \subsection*{Question 39}
@@ -492,9 +492,9 @@ A scene must place the same chair 40 times with full per-chair prim identity
 Sublayers vs references --- the deciding question is:
 \begin{itemize}[leftmargin=*]
   \item A.\ Binary vs text encoding of the layers.
-  \item B.\ Same namespace (opinions about the same prims) vs grafting a subtree under a new path.
-  \item C.\ Whether the data is animated.
-  \item D.\ Number of files involved.
+  \item B.\ Whether the data is animated.
+  \item C.\ Number of files involved.
+  \item D.\ Same namespace (opinions about the same prims) vs grafting a subtree under a new path.
 \end{itemize}
 
 \subsection*{Question 43}
@@ -511,8 +511,8 @@ asserts each target lives under \texttt{defaultPrim}. This prevents:
 Which statement about \texttt{visibility} is correct?
 \begin{itemize}[leftmargin=*]
   \item A.\ It does not inherit; each prim must be hidden individually.
-  \item B.\ \texttt{invisible} on an ancestor hides the whole subtree.
-  \item C.\ It only affects proxy-purpose prims.
+  \item B.\ It only affects proxy-purpose prims.
+  \item C.\ \texttt{invisible} on an ancestor hides the whole subtree.
   \item D.\ It is metadata, not an attribute.
 \end{itemize}
 
@@ -540,9 +540,9 @@ back to \texttt{base.usda}'s. This demonstrates:
 glTF interchange: which conversion concern is real?
 \begin{itemize}[leftmargin=*]
   \item A.\ glTF stores n-gons natively; USD must triangulate.
-  \item B.\ USD n-gons must be triangulated for glTF, and up-axis/units must be converted (glTF is Y-up, meters).
-  \item C.\ glTF cannot store UVs.
-  \item D.\ USD and glTF share the same material model exactly.
+  \item B.\ glTF cannot store UVs.
+  \item C.\ USD and glTF share the same material model exactly.
+  \item D.\ USD n-gons must be triangulated for glTF, and up-axis/units must be converted (glTF is Y-up, meters).
 \end{itemize}
 
 \subsection*{Question 48}
@@ -568,9 +568,9 @@ A nightly tool authors 50{,}000 attribute values one by one and is slow in
 change processing. The first fix to try:
 \begin{itemize}[leftmargin=*]
   \item A.\ Convert all layers to usda.
-  \item B.\ Wrap the authoring loop in \texttt{Sdf.ChangeBlock} (writing at the Sdf level, reading only after).
-  \item C.\ Run with \texttt{TF\_DEBUG=USD\_CHANGES} permanently enabled.
-  \item D.\ Re-open the stage between edits.
+  \item B.\ Run with \texttt{TF\_DEBUG=USD\_CHANGES} permanently enabled.
+  \item C.\ Re-open the stage between edits.
+  \item D.\ Wrap the authoring loop in \texttt{Sdf.ChangeBlock} (writing at the Sdf level, reading only after).
 \end{itemize}
 
 \subsection*{Question 51}
@@ -606,9 +606,9 @@ An OBJ face line \texttt{f 1 2 3 4} maps to USD as:
 \texttt{invisibleIds} on a PointInstancer:
 \begin{itemize}[leftmargin=*]
   \item A.\ Deletes the listed instances from the arrays.
-  \item B.\ Hides the listed instances without touching positions/protoIndices --- cheap and reversible.
-  \item C.\ Hides whole prototypes.
-  \item D.\ Is only honored by usdview.
+  \item B.\ Hides whole prototypes.
+  \item C.\ Is only honored by usdview.
+  \item D.\ Hides the listed instances without touching positions/protoIndices --- cheap and reversible.
 \end{itemize}
 
 \subsection*{Question 55}
@@ -624,8 +624,8 @@ The Ar resolver's job, in one sentence:
 \texttt{color3f} vs \texttt{vector3f} vs \texttt{point3f} --- why does the
 role matter if all are three floats?
 \begin{itemize}[leftmargin=*]
-  \item A.\ It does not; they are interchangeable.
-  \item B.\ Roles drive transformation (points translate, vectors do not) and color management.
+  \item A.\ Roles drive transformation (points translate, vectors do not) and color management.
+  \item B.\ It does not; they are interchangeable.
   \item C.\ Only \texttt{color3f} supports time samples.
   \item D.\ Roles change storage precision.
 \end{itemize}
@@ -644,8 +644,8 @@ A stage opens with warnings: ``Unresolved reference prim path \ldots\
 \texttt{LightAPI} provides which inputs shared by every light type?
 \begin{itemize}[leftmargin=*]
   \item A.\ \texttt{angle} and \texttt{radius}.
-  \item B.\ \texttt{intensity}, \texttt{color}, \texttt{exposure}.
-  \item C.\ \texttt{shadow:color} only.
+  \item B.\ \texttt{shadow:color} only.
+  \item C.\ \texttt{intensity}, \texttt{color}, \texttt{exposure}.
   \item D.\ \texttt{focalLength} and \texttt{clippingRange}.
 \end{itemize}
 
@@ -664,8 +664,8 @@ is:
 Time budget reality check: the official exam gives roughly 90 minutes for
 60 questions. The strategy test-takers recommend:
 \begin{itemize}[leftmargin=*]
-  \item A.\ Spend up to five minutes per question to be safe.
-  \item B.\ Eliminate clearly-wrong options fast, mark uncertain questions, and return --- about 90 seconds per question on average.
+  \item A.\ Eliminate clearly-wrong options fast, mark uncertain questions, and return --- about 90 seconds per question on average.
+  \item B.\ Spend up to five minutes per question to be safe.
   \item C.\ Answer only questions you are sure about.
   \item D.\ Start from question 60 backwards.
 \end{itemize}

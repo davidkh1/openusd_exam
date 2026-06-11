@@ -183,19 +183,21 @@ the official sample-question style, never to dump material.
 
 ## Phase 4 — Beauty pass
 
-- [ ] Sweep all diagrams onto the shared TikZ styles; one palette everywhere.
-- [ ] Screenshots where pixels matter (usdview inspector, instancing displays,
-      UsdPreviewSurface results). Pipeline live since 2026-06-11
-      (`tools/regen_figures.py` renders from the chapter listings;
-      `tools/xwd2png.py` converts usdview window dumps): Composition has an
-      annotated `usdrecord` render and an annotated `usdview` capture. Extend
-      per chapter.
-- [ ] Typography review on the print trim (6.375 × 9.25 in): widows/orphans,
-      listing overflow, fancyhdr headers, hyperref colors in print vs screen.
-- [ ] Cover design for KDP (outside the LaTeX build).
-- [ ] Kindle decision: KDP "print replica" PDF vs proper EPUB (via pandoc/tex4ht
-      — costly with this much custom LaTeX). Recommendation: PDF-first release,
-      EPUB only if sales justify it.
+- [x] All diagrams on the shared TikZ styles (true by construction: every
+      figure uses `styles/diagrams.tex` nodes and palette).
+- [x] Screenshots/renders where pixels matter: 6 usdrecord renders + 3
+      annotated usdview captures across Composition, Content Aggregation,
+      Data Modeling, Debugging, Visualization, and the answer key — all
+      regenerable from the chapter listings.
+- [x] Typography pass: Latin Modern (scalable, no PK bitmaps), widow/club
+      penalties + ragged bottom, zero overfull boxes maintained across all
+      141 pages, mock-exam answer letters rebalanced (15/16/15/14). A final
+      human cold-read before release is still recommended.
+- [x] Cover v1 generated from the book's own assets
+      (`tools/make_cover.py` → `usd_exam_companion/cover/cover.png`,
+      1600×2560 KDP size). Final cover art remains a release-time decision.
+- [x] Kindle decision: PDF print-replica first (decision 3, made
+      2026-06-11); EPUB only if sales justify it.
 
 ## Phase 5 — Release
 
