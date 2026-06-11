@@ -193,7 +193,32 @@ print("USD_CHANGES" in names, "PLUG_REGISTRATION" in names)  # True True
 
 \noindent For floods of warnings, a \emph{coalescing diagnostic delegate}
 (in \texttt{UsdUtils}; see Resources) collects and deduplicates them instead
-of spamming stderr. For time, the \texttt{Trace} module
+of spamming stderr.
+
+For \emph{time}, the \texttt{Trace} module instruments scopes and prints a
+nested timing tree --- this runs anywhere USD runs, no rebuild:
+
+\begin{lstlisting}[language=Python]
+from pxr import Trace, Usd
+
+collector = Trace.Collector()
+collector.enabled = True
+with Trace.TraceScope("open-and-traverse"):
+    stage = Usd.Stage.Open("shot.usda")
+    count = len(list(stage.Traverse()))
+collector.enabled = False
+
+Trace.Reporter.globalReporter.Report()
+# Main Thread
+#  | open-and-traverse
+#  |   UsdStage::Open
+#  |   ...inclusive/exclusive ms per scope...
+\end{lstlisting}
+
+\noindent Your named scope appears among USD's own (the \texttt{Pcp}
+prim-indexing scopes and friends), so ``where does opening this stage spend
+its time'' stops being a guess. For memory, \texttt{TfMallocTag}
+plays the same role on allocations.\index{Trace} For time, the \texttt{Trace} module
 instruments scopes (\texttt{usdview} ships a built-in profiler view); for
 memory, \texttt{TfMallocTag} attributes allocations --- both are ``know they
 exist and what for'' exam material.\index{Trace}\index{TfMallocTag}

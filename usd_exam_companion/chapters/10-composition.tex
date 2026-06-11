@@ -338,6 +338,77 @@ builds: predict the composed value from the layers alone, \emph{then}
 verify. The checkpoint questions below are designed to be solved blind.
 \end{FieldNote}
 
+\subsection{Inherits and specializes, worked}\label{sec:c-inh}\objref{1.6}
+The I and the S of LIVRPS earn their letters with two distinct superpowers.
+\emph{Inherits} is a broadcast channel: prims that inherit a class pick up
+\emph{any future edit} to it --- across the whole stage, after referencing,
+at any strength the editor chooses:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "World" )
+def Xform "World" {
+    class "_tree" {
+        color3f[] primvars:displayColor = [(0, 0.5, 0)]
+    }
+    def Sphere "Tree_01" (
+        inherits = </World/_tree>
+    )
+    {
+    }
+    def Sphere "Tree_02" (
+        inherits = </World/_tree>
+    )
+    {
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd
+
+stage = Usd.Stage.Open("forest_inh.usda")
+stage.GetPrimAtPath("/World/_tree").GetAttribute(
+    "primvars:displayColor").Set([(0.8, 0.5, 0.1)])   # autumn, once
+
+print(stage.GetPrimAtPath("/World/Tree_02").GetAttribute(
+    "primvars:displayColor").Get()[0])   # (0.8, 0.5, 0.1) -- every tree
+\end{lstlisting}
+
+\noindent\emph{Specializes} is the opposite temperament: a fallback that
+never wins. The specialized prim starts from its base and refines it, but
+\emph{any} opinion authored anywhere else beats what came through the
+specialize arc --- S is last in LIVRPS by design:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "World" )
+def Xform "World" {
+    class "Metal" {
+        float roughness = 0.4
+    }
+    def Scope "RustyMetal" (
+        specializes = </World/Metal>
+    )
+    {
+        float dirt = 0.8
+    }
+}
+\end{lstlisting}
+
+\noindent\texttt{RustyMetal} composes \texttt{roughness = 0.4} as long as
+nobody says otherwise --- author any other opinion and the specialize
+fallback yields silently (verified by this book's tests).
+
+\begin{ExamTip}
+Choosing between them: \emph{inherits} when downstream consumers must be
+able to edit one place and re-skin every instance (the class is a live
+broadcast hub); \emph{specializes} when a refinement must track its base
+\emph{without ever overriding} anything anyone authored. ``Which arc still
+lets the base shine through after referencing?'' --- both; ``which one never
+beats a direct opinion?'' --- specializes.
+\end{ExamTip}
+
 \subsection{Edit targets and delivery}\label{sec:c-edit}\objref{1.9, 1.11}
 \index{edit target}\index{flatten}Every authored opinion lands in the layer
 selected by the stage's \emph{edit target} --- the root layer by default.
@@ -356,6 +427,71 @@ you want at a trust boundary.\index{usdcat}
 package with \texttt{usdzip} when textures must travel along). ``Split a
 monolithic asset for collaboration'' $\Rightarrow$ the reverse: break it into
 referenced layers with clear ownership.
+\end{ExamTip}
+
+\subsection{The same arcs, through the API}\label{sec:c-api}\objref{1.1, 1.3, 1.4}
+Everything this chapter authored as scene description has a Python twin ---
+and the exam uses both surfaces: scenario questions print usda for you to
+\emph{read}; API questions expect you to \emph{write} the calls. Here is the
+layer-offset stage again, built entirely through the API:
+
+\begin{lstlisting}[language=Python]
+from pxr import Sdf, Usd
+
+stage = Usd.Stage.CreateNew("shot_api.usda")
+shot = stage.DefinePrim("/Shot", "Xform")
+stage.SetDefaultPrim(shot)
+
+ballA = stage.DefinePrim("/Shot/BallA")
+ballA.GetReferences().AddReference("./anim.usda")
+
+ballB = stage.DefinePrim("/Shot/BallB")
+ballB.GetReferences().AddReference(
+    "./anim.usda", layerOffset=Sdf.LayerOffset(offset=10))
+
+ballC = stage.DefinePrim("/Shot/BallC")
+ballC.GetReferences().AddReference(
+    "./anim.usda", layerOffset=Sdf.LayerOffset(scale=2))
+
+tB = ballB.GetAttribute("xformOp:translate")
+tC = ballC.GetAttribute("xformOp:translate")
+print(tB.Get(12), tC.Get(12))   # (1, 0, 0) (5, 0, 0)
+\end{lstlisting}
+
+\noindent Same arcs, same LIVRPS, same composed values --- verified against
+the usda version by this book's test suite. The dictionary between the two
+surfaces is small enough to memorize:
+
+\begin{center}
+\begin{tabular}{@{}p{1.55in}p{2.95in}@{}}
+\textbf{\sffamily scene description} & \textbf{\sffamily Python API} \\[2pt]
+\footnotesize\ttfamily subLayers = [@a.usda@] &
+  \footnotesize\ttfamily layer.subLayerPaths.append("a.usda") \\[2pt]
+\footnotesize\ttfamily references = @a@ (offset = 10) &
+  \footnotesize\ttfamily prim.GetReferences().AddReference("a",
+  layerOffset=Sdf.LayerOffset(10)) \\[2pt]
+\footnotesize\ttfamily payload = @a@ &
+  \footnotesize\ttfamily prim.GetPayloads().AddPayload("a") \\[2pt]
+\footnotesize\ttfamily variantSet / variants &
+  \footnotesize\ttfamily prim.GetVariantSets().AddVariantSet("s");
+  vset.SetVariantSelection("v") \\[2pt]
+\footnotesize\ttfamily instanceable = true &
+  \footnotesize\ttfamily prim.SetInstanceable(True) \\[2pt]
+\footnotesize\ttfamily kind = "component" &
+  \footnotesize\ttfamily Usd.ModelAPI(prim).SetKind("component") \\[2pt]
+\footnotesize\ttfamily defaultPrim = "X" &
+  \footnotesize\ttfamily stage.SetDefaultPrim(prim) \\[2pt]
+\footnotesize\ttfamily active = false &
+  \footnotesize\ttfamily prim.SetActive(False) \\
+\end{tabular}
+\end{center}
+
+\begin{ExamTip}
+Fluency in both directions pays twice: composition questions show layers you
+must trace by eye, and API questions show calls whose composed effect you
+must predict. When practicing, write each drill scenario once as usda and
+once through the API --- if your two versions compose differently, you have
+found a gap worth closing.
 \end{ExamTip}
 
 \DrillsTitle

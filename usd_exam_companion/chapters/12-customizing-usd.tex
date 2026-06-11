@@ -197,6 +197,27 @@ working. Create custom kinds when tools must select your category
 \emph{every} site that consumes the assets --- kinds are vocabulary, not
 data.
 
+Registration end to end is exactly two steps: put the
+\texttt{plugInfo.json} in a directory, put that directory on
+\texttt{PXR\_PLUGINPATH\_NAME}. Verification is three lines --- and this
+book's test suite runs precisely this in a subprocess against the
+\texttt{plugInfo.json} printed above:
+
+\begin{lstlisting}[language=Python]
+# PXR_PLUGINPATH_NAME=/studio/plugins/studio_kinds python
+from pxr import Kind
+
+print(Kind.Registry.HasKind("vehicle"))      # True
+print(Kind.Registry.GetBaseKind("vehicle"))  # component
+\end{lstlisting}
+
+\noindent Codeless schemas ride the same mechanism --- their plugin
+directory carries a \texttt{generatedSchema.usda} plus a
+\texttt{plugInfo.json} with \texttt{Types} entries. Let
+\texttt{usdGenSchema} generate both from your \texttt{schema.usda}:
+the \texttt{Types} block encodes TfType registration details that are
+easy to get subtly wrong by hand.
+
 \subsection{Resolvers, file formats, and SceneIndex --- who does what}\label{sec:cu-ext}\objref{3.5, 3.7, 3.8}
 Three extension points get conflated on exams; the boundaries are clean:
 

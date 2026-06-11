@@ -158,9 +158,35 @@ def PointInstancer "Scatter" {
   \label{fig:scatter}
 \end{figure}
 
+Per-instance variation comes from more parallel arrays --- orientations
+(half-precision quaternions, real part first) and scales, one entry per
+instance, authorable as an override layer over the scatter:
+
+\begin{lstlisting}
+#usda 1.0
+over "Scatter" {
+    quath[] orientations = [(0.92388, 0, 0.38268, 0), (1, 0, 0, 0),
+        (1, 0, 0, 0), (1, 0, 0, 0)]
+    float3[] scales = [(1, 1, 1), (1.5, 1.5, 1.5), (1, 1, 1),
+        (0.7, 0.7, 0.7)]
+}
+\end{lstlisting}
+
 \noindent\textbf{Adding a prototype} is two edits: append its prim to the
 \texttt{prototypes} relationship (its position in the target list is its
-index) and use that index in \texttt{protoIndices}.
+index) and use that index in \texttt{protoIndices} --- here through the API,
+exam-style:
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd, UsdGeom
+
+stage = Usd.Stage.Open("scatter.usda")
+pi = UsdGeom.PointInstancer(stage.GetPrimAtPath("/Scatter"))
+
+fern = UsdGeom.Cone.Define(stage, "/Scatter/Protos/Fern")
+pi.GetPrototypesRel().AddTarget(fern.GetPath())   # becomes index 2
+pi.GetProtoIndicesAttr().Set([0, 1, 0, 2])        # instance 3 is a Fern
+\end{lstlisting}
 \textbf{Hiding instances} is one edit: put their ids into
 \texttt{invisibleIds} --- by default an instance's id \emph{is} its array
 position, unless an explicit \texttt{ids} array says otherwise. No geometry

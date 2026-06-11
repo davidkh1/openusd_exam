@@ -9,9 +9,10 @@ questions) live in CLAUDE.md and are not repeated here.
 
 - A $0.99 PDF/Kindle companion in the spirit of "Cracking the Coding Interview":
   the most time-efficient path from "finished the courses" to "passed the exam".
-- Reader: a software developer who has already worked through NVIDIA's Learn
-  OpenUSD materials — and still finds the exam hard. The companion covers the
-  gap: traps, edge-case semantics, strength ordering, API specifics.
+- Reader: a software developer familiar with NVIDIA's Learn OpenUSD
+  materials — who still finds the exam hard. The companion covers the gap:
+  traps, edge-case semantics, strength ordering, API specifics. (Stated in
+  the book's Preface, "Who this book is for".)
 - Evidence the gap is real: a genuine attempt's section scores (private, under
   `ideas/materials_from_dropbox/my_openusd_certificate/`) landed at 48–73% per
   domain after course-level prep. Weight gotcha coverage accordingly — Data
@@ -51,8 +52,9 @@ assertions; 10 tests green), `usdview`/`usdrecord` validated end-to-end
 Standing rule: unit tests are a first-class part of the project — every new
 listing lands together with a test that asserts what the answer key claims.
 
-Remaining:
-- [ ] Add a `ComplianceChecker` pass to the test suite.
+Remaining: none.
+- [x] ComplianceChecker pass in the test suite (clean vs broken export in
+      c13 tests; the OBJ-importer test asserts checker-clean output).
 
 Done 2026-06-11:
 - [x] Colorized listings (`styles/usdlisting.tex`): color theme + full usda
@@ -69,9 +71,8 @@ Done 2026-06-11:
       not Sublayers (sublayers are part of "Local"). Done — cheat sheet, ladder
       figure, and drills all teach the corrected ordering.
 - [x] Fix Question 3: option `extent` replaced with `faceVertexCounts`.
-- [ ] Fact-check every cheat-sheet bullet in the remaining 7 domain chapters
-      against the study guide and OpenUSD docs (Composition done with its
-      rebuild).
+- [x] Fact-check every cheat-sheet bullet: all 8 chapters were rebuilt with
+      probe-verified claims (every API behavior executed before printing).
 - [x] Upgrade the answer key from bare letters to explained answers (why right,
       why each distractor is wrong); composition claims verified by tests.
 
@@ -126,7 +127,8 @@ asset_structure, data_exchange) — adapt into original micro-examples, test eac
 
 ## Phase 2.5 — Deepening backlog (no page budget; add until objectives are saturated)
 
-Sourcing policy (2026-06-11): adapt examples from openusd.org tutorials where
+Sourcing policy (2026-06-11): adapt examples from openusd.org and https://docs.nvidia.com/learn-openusd/latest/index.html
+tutorials where
 the study guide references them — the guide's Resources point almost
 exclusively there, so structural alignment helps readers. License is OpenUSD's
 modified Apache 2.0: adaptation with attribution is fine, including
@@ -140,29 +142,35 @@ item), "End to End Example" (→ Pipeline cross-check).
 First-pass chapters cover every objective; these are the known thin spots
 where honest depth adds pages:
 
-- [ ] Composition: worked `inherits` (class broadcast) and `specializes`
-      (fallback) examples — currently definition-level only in the LIVRPS
-      ladder. Tested listings.
-- [ ] Data Exchange: a real mini-importer — OBJ→USD in ~25 lines (adapt
-      `ideas/.../examples/data_exchange/obj2usd.py`), tested; nails
-      objectives 4.7/4.8 with code instead of prose.
-- [ ] Data Modeling: time samples & TimeCode in depth (Get(time), held
-      values, `SetInterpolationType`), xformOps/XformCommonAPI/XformCache
-      worked examples.
-- [ ] Debugging: a runnable `Trace` listing (collector + reporter output).
-      (Layer Stack tab screenshot: done 2026-06-11, annotated, Figure 8.1.)
+- [x] Composition: worked `inherits` (broadcast) and `specializes`
+      (fallback) examples — §3.3.7, tested.
+- [x] Data Exchange: OBJ→USD importer in 25 lines (§6.3.4), tested —
+      output is ComplianceChecker-clean.
+- [x] Data Modeling: time samples/TimeCode (linear vs held, Default-time
+      trap) + XformCommonAPI — §7.3.6–7.3.7, tested.
+- [x] Debugging: runnable `Trace` listing (named scope asserted in the
+      reporter output by tests). Layer Stack screenshot done earlier.
 - [x] Data Modeling: usdview properties-panel capture of the type-zoo prim
       (Figure 7.2, annotated — relationship vs asset path made visual).
-- [ ] Content Aggregation: per-instance `orientations`/`scales` arrays,
-      nested instancing, "add a prototype" as a tested listing not a recipe.
-- [ ] Visualization: UsdUVTexture network (texture-driven material) with
-      render, `UsdGeomCamera` basics, a lit render using the DistantLight.
-- [ ] Customizing USD: codeless-schema registration walkthrough
-      (PXR_PLUGINPATH_NAME, generatedSchema.usda) step by step.
-- [ ] Practice part: grow from 13 questions toward the calibrated
-      distribution (Phase 3 is the bulk of future pages).
+- [x] Content Aggregation: per-instance `orientations`/`scales` (quath
+      syntax verified) + AddTarget prototype listing, tested.
+- [x] Visualization: UsdUVTexture network + authored Camera + DistantLight
+      in one scene, rendered through the authored camera (Figure), tested.
+- [x] Customizing USD: registration end-to-end — the book's own
+      plugInfo.json is registered in a subprocess by the test suite;
+      codeless-schema flow described honestly (usdGenSchema generates the
+      Types block).
+- [x] Practice part: Phase 3 delivered (below).
 
 ## Phase 3 — Question bank and mock exam
+
+**DONE 2026-06-11.** Sixty original questions (mixed-domain order
+approximating the official weights: Comp 12, DE 9, DM 9, DT 7, CA 6, VIS 6,
+PD 6, CU 4, exam-craft 1), 90-minute closed-book framing, three
+listing-based scenario questions verified by the test suite, and an
+explained key opening with a Certiverse-style per-domain scoring table that
+points each weak row at its chapter. Original content only — calibrated to
+the official sample-question style, never to dump material.
 
 - Method: build a topic × difficulty histogram from the third-party question
   PDFs under `ideas/` (calibration only — never copy), then write **original**

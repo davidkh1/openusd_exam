@@ -151,6 +151,22 @@ def main():
                    str(root / 'c17/shaded.png')])
         (root / 'c17/shaded.png').replace(FIGURES / 'c17_primvar_material.png')
 
+        # Visualization: textured + lit + authored camera.
+        from PIL import Image
+        tile, n = 64, 8
+        img = Image.new('RGB', (tile * n, tile * n))
+        for y in range(n):
+            for x in range(n):
+                color = (235, 235, 230) if (x + y) % 2 else (40, 90, 160)
+                img.paste(color, (x * tile, y * tile,
+                                  (x + 1) * tile, (y + 1) * tile))
+        img.save(root / 'c17/checker.png')
+        usdrecord(['--imageWidth 1100', '--complexity high',
+                   '--camera /Scene/Cam',
+                   str(root / 'c17/tex_scene.usda'),
+                   str(root / 'c17/tex.png')])
+        (root / 'c17/tex.png').replace(FIGURES / 'c17_textured.png')
+
     print('wrote', FIGURES / 'c10_offsets_t12.png')
     print('wrote', FIGURES / 'q13_cube_red.png')
     print('wrote', FIGURES / 'q02_chair_options.png')

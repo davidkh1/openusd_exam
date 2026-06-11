@@ -148,6 +148,55 @@ set attributes --- with one extra decision that separates good pipelines from
 destructive ones: \emph{author into a new layer, as \texttt{over}s where the
 data refines something that already exists} (see Round-trip pipelines below).
 
+\subsection{A real importer in 25 lines}\label{sec:de-importer}\objref{4.7, 4.8}
+The skeleton becomes concrete with the smallest real format there is ---
+Wavefront OBJ. Five lines of OBJ:
+
+\begin{lstlisting}
+v -1 -1 -1
+v 1 -1 -1
+v 1 1 -1
+v -1 1 -1
+f 1 2 3 4
+\end{lstlisting}
+
+\noindent And an importer that produces a \emph{clean} USD asset --- stage
+metadata, computed extent and all, so it passes this chapter's own validator:
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd, UsdGeom
+
+points, counts, indices = [], [], []
+for line in open("box.obj"):
+    parts = line.split()
+    if not parts:
+        continue
+    if parts[0] == "v":
+        points.append(tuple(float(x) for x in parts[1:4]))
+    elif parts[0] == "f":
+        face = [int(p.split("/")[0]) - 1 for p in parts[1:]]
+        counts.append(len(face))
+        indices.extend(face)
+
+stage = Usd.Stage.CreateNew("box_imported.usda")
+mesh = UsdGeom.Mesh.Define(stage, "/Box")
+stage.SetDefaultPrim(mesh.GetPrim())
+UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
+UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+mesh.GetPointsAttr().Set(points)
+mesh.GetFaceVertexCountsAttr().Set(counts)
+mesh.GetFaceVertexIndicesAttr().Set(indices)
+mesh.GetExtentAttr().Set(UsdGeom.Boundable.ComputeExtentFromPlugins(
+    mesh, Usd.TimeCode.Default()))
+stage.Save()
+\end{lstlisting}
+
+\noindent Every exporter/importer question reduces to this shape: parse (or
+emit) the foreign side, map onto schema attributes, declare the stage
+conventions, author the extent. OBJ's 1-based face indices becoming USD's
+0-based \texttt{faceVertexIndices} is the kind of mapping detail the
+conceptual mapping document exists to record.
+
 \subsection{Mapping USD to glTF (and friends)}\label{sec:de-map}\objref{4.1, 4.2}
 Conversion quality is decided before any code is written --- in the
 \emph{conceptual data mapping}: which concept on one side corresponds to

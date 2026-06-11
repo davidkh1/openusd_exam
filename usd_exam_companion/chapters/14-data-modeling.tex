@@ -213,6 +213,73 @@ mesh.GetExtentAttr().Set(extent)
 print(extent)   # [(-2, 0, -2), (2, 0, 2)]
 \end{lstlisting}
 
+\subsection{Time, samples, and interpolation}\label{sec:dm-time}\objref{5.2, 5.5}
+\index{timeSamples}\index{TimeCode}An attribute holds a \emph{default} and
+optionally \emph{time samples}; queries take a \texttt{TimeCode}:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Ball" )
+def Sphere "Ball" {
+    double radius.timeSamples = {
+        1: 1,
+        11: 11,
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd
+
+stage = Usd.Stage.Open("ball_anim.usda")
+radius = stage.GetPrimAtPath("/Ball").GetAttribute("radius")
+
+print(radius.Get(6))                       # 6.0  -- linear interpolation
+print(radius.GetBracketingTimeSamples(6))  # (1.0, 11.0)
+
+stage.SetInterpolationType(Usd.InterpolationTypeHeld)
+print(radius.Get(6))                       # 1.0  -- held: previous sample
+\end{lstlisting}
+
+\noindent Three rules cover most exam traps: between samples, the
+\emph{stage's} interpolation type decides (linear by default, held as an
+option --- there is no spline yet); outside the sampled range the nearest
+sample is held; and \texttt{Get()} with no argument means
+\texttt{TimeCode.Default()}, which reads the \emph{default value, not the
+samples} --- an attribute with only time samples returns nothing at Default.
+
+\begin{Gotcha}
+``The value is right in usdview but wrong in my script'' is often a
+\texttt{TimeCode} bug: usdview queries at the current frame; your script
+queried Default. Pass the time explicitly ---
+\texttt{attr.Get(Usd.TimeCode(frame))} --- whenever samples exist.
+\end{Gotcha}
+
+\subsection{Transforms without tears: XformCommonAPI}\label{sec:dm-xform}\objref{5.1, 5.4}
+\index{XformCommonAPI}\index{xformOp}Raw \texttt{xformOp:*} attributes are
+flexible and easy to get wrong (op order!). For the standard
+translate/rotate/scale case, \texttt{XformCommonAPI} authors a canonical
+stack and reads it back as plain vectors:
+
+\begin{lstlisting}[language=Python]
+from pxr import Gf, Usd, UsdGeom
+
+stage = Usd.Stage.CreateInMemory()
+prim = UsdGeom.Xform.Define(stage, "/Crate").GetPrim()
+
+api = UsdGeom.XformCommonAPI(prim)
+api.SetTranslate(Gf.Vec3d(1, 2, 3))
+api.SetRotate(Gf.Vec3f(0, 45, 0))
+api.SetScale(Gf.Vec3f(2, 2, 2))
+
+t, r, s, pivot, order = api.GetXformVectors(Usd.TimeCode.Default())
+print(t, r, s)   # (1, 2, 3) (0, 45, 0) (2, 2, 2)
+\end{lstlisting}
+
+\noindent For world-space answers across a hierarchy, use
+\texttt{UsdGeom.XformCache} --- it memoizes local-to-world matrices per time
+code, which is also the right tool inside exporters.\index{XformCache}
+
 \DrillsTitle
 \subsection*{Drill 1: Primvar practice}
 Write a minimal Mesh that includes \texttt{primvars:st} with faceVarying

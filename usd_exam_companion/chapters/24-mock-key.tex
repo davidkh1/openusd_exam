@@ -1,0 +1,235 @@
+\chapter{Mock Exam Key}
+\label{ch:mockkey}
+
+Score one point per correct answer, then total each domain row below ---
+the same per-domain readout Certiverse gives you, so a weak row tells you
+which chapter to revisit. (Domain sizes approximate the official weights.)
+Composition scenario answers in this key are verified by this book's test
+suite.
+
+\begin{center}
+\begin{tabular}{@{}p{1.75in}p{2.0in}p{0.55in}@{}}
+\textbf{\sffamily Domain (chapter)} & \textbf{\sffamily Questions} & \textbf{\sffamily /total} \\[2pt]
+Composition (\S3) & 1, 3, 10, 11, 12, 13, 18, 25, 41, 42, 52, 57 & /12 \\
+Data Exchange (\S6) & 2, 4, 15, 24, 30, 31, 35, 47, 51 & /9 \\
+Data Modeling (\S7) & 6, 17, 23, 33, 34, 45, 48, 49, 56 & /9 \\
+Debugging (\S8) & 7, 14, 20, 29, 36, 46, 50 & /7 \\
+Content Aggregation (\S4) & 8, 19, 26, 32, 40, 54 & /6 \\
+Visualization (\S10) & 9, 27, 37, 38, 44, 58 & /6 \\
+Pipeline Development (\S9) & 5, 21, 22, 43, 53, 55 & /6 \\
+Customizing USD (\S5) & 16, 28, 39, 59 & /4 \\
+Exam craft & 60 & /1 \\
+\end{tabular}
+\end{center}
+
+\subsection*{Answers}
+
+\noindent\textbf{1. A} --- Local, Inherits, VariantSets, References,
+Payload, Specializes. B is the classic wrong expansion (sublayers are
+\emph{Local}); the others scramble letters.
+
+\noindent\textbf{2. B} --- the extension does not commit to an encoding;
+\texttt{usdcat} (or the \texttt{PXR-USDC} magic bytes) reveals it.
+
+\noindent\textbf{3. C} --- the root layer's own opinion is the strongest
+Local opinion, above both sublayers; 6 wins. Verified by composition in the
+test suite.
+
+\noindent\textbf{4. B} --- \texttt{Traverse()} skips instance contents;
+traverse with instance proxies (or de-instance for export).
+
+\noindent\textbf{5. B} --- the model hierarchy must be contiguous: a
+component under a plain prim reports \texttt{IsModel() == False} (verified
+in \S9). A is therefore false; subcomponents are not models; nothing
+validates kinds at save time.
+
+\noindent\textbf{6. C} --- metadata (including \texttt{customData} and
+\texttt{assetInfo}) is never time-sampled; time-varying values live in
+attributes.
+
+\noindent\textbf{7. B} --- muting removes the layer from composition,
+in-session and reversibly: the bisection tool.
+
+\noindent\textbf{8. B} --- proxies exist for reading; authoring raises
+\texttt{Tf.ErrorException} (verified in \S4).
+
+\noindent\textbf{9. B} --- a \texttt{float3} primvar reader with
+\texttt{varname = "displayColor"} feeding \texttt{diffuseColor}. D reads
+UVs; A reads a texture; C connects nothing a surface output understands.
+
+\noindent\textbf{10. A} --- \texttt{defaultPrim} answers ``what composes
+when this layer is referenced/payloaded without a prim path''.
+
+\noindent\textbf{11. C} --- stage time $=$ source $\times$ scale $+$ offset
+$= 10 \times 2 + 20 = 40$.
+
+\noindent\textbf{12. B} --- flatten bakes composition and strips internal
+structure; \texttt{usdzip} packages dependencies for travel.
+
+\noindent\textbf{13. A} --- within one arc class, earlier list entries are
+stronger; \texttt{propA}'s red wins. Verified by composition in the test
+suite.
+
+\noindent\textbf{14. B} --- ChangeBlock coalesces many small edits into one
+round of change processing; it does nothing for single edits and is wrong
+around composed reads.
+
+\noindent\textbf{15. C} --- usdz: uncompressed, 64-byte-aligned zip,
+delivery-oriented, not an editing format.
+
+\noindent\textbf{16. B} --- kinds are registered vocabulary: plugInfo
+discovered via \texttt{PXR\_PLUGINPATH\_NAME}, on every site that consumes
+the assets. (This book's tests register one in a subprocess to prove the
+flow.)
+
+\noindent\textbf{17. C} --- uniform means one value per \emph{face}; one
+face, three values: invalid. Constant wants one value total (A's reasoning
+is wrong); vertex wants one per point, which 4 satisfies.
+
+\noindent\textbf{18. B} --- the default load policy is \texttt{LoadAll};
+deferral is opt-in via \texttt{LoadNone}/\texttt{Load()}.
+
+\noindent\textbf{19. B} --- edit what the prototype composes from and every
+instance follows; per-instance edits require de-instancing (and C's
+``all instances'' defeats instancing wholesale).
+
+\noindent\textbf{20. B} --- strongest first; the top spec is the opinion the
+stage returns.
+
+\noindent\textbf{21. B} --- the asset interface pattern: stable thin entry
+point, heavy contents deferrable behind the payload, versions repointable
+without touching consumers.
+
+\noindent\textbf{22. A} --- \texttt{GetCompositionAssetDependencies()}
+returns exactly the sublayer/reference/payload asset paths; the gate checks
+them for absolute paths and backslashes.
+
+\noindent\textbf{23. B} --- token is for closed vocabularies; text wants
+\texttt{string}, paths want \texttt{asset}, prim pointers want \texttt{rel}.
+
+\noindent\textbf{24. B} --- the stage-metadata rules report three failures:
+missing \texttt{upAxis}, missing \texttt{metersPerUnit}, missing/invalid
+\texttt{defaultPrim} (this book runs the checker on exactly this case).
+
+\noindent\textbf{25. A} --- I sits above V; S sits at the very bottom:
+inherits broadcasts with strength, specializes is the never-winning
+fallback.
+
+\noindent\textbf{26. A} --- list position is the index: the appended
+prototype is index 2.
+
+\noindent\textbf{27. B} --- purpose tags subtrees for consumers; proxy
+draws in interactive viewports, render in final frames, and
+\texttt{default} everywhere.
+
+\noindent\textbf{28. B} --- per-release C++ ABI: same version, same
+toolchain, or the plug-in silently fails to load
+(\texttt{TF\_DEBUG=PLUG\_REGISTRATION} shows why).
+
+\noindent\textbf{29. B} --- the property stack \emph{is} the provenance
+answer; everything else is archaeology.
+
+\noindent\textbf{30. B} --- foreign formats hold flat data; arcs, variants,
+payloads, and offsets bake away. Protecting the source of truth is pipeline
+design (overs + layers).
+
+\noindent\textbf{31. B} --- new layer, sparse \texttt{over}s, composed above
+the original; the original file is never rewritten.
+
+\noindent\textbf{32. B} --- per-instance half-precision quaternions, real
+part first (one entry per instance, like every PointInstancer array).
+
+\noindent\textbf{33. C} --- Default-time queries read the default value;
+samples answer only timed queries. The classic ``works in usdview, empty in
+my script'' bug.
+
+\noindent\textbf{34. B} --- held interpolation returns the previous sample:
+1. (Linear would give 6; both verified in \S7's listing.)
+
+\noindent\textbf{35. B} --- same scene description, different container:
+crate is memory-mapped and lazy; text is greppable and diffable.
+
+\noindent\textbf{36. B} --- plugin discovery problems are invisible without
+it; the other options have their own tools.
+
+\noindent\textbf{37. B} --- one material + per-prim primvars keeps sharing
+intact; unique networks per instance fork prototypes (the instancing-breaker
+list).
+
+\noindent\textbf{38. B} --- subsets store face \emph{indices}; topology
+edits silently re-target them. Validate subsets after any
+topology-touching step.
+
+\noindent\textbf{39. B} --- codeless schemas deploy as data: no
+compilation, no ABI coupling; generated accessors are the trade-away.
+
+\noindent\textbf{40. B} --- full prim identity at moderate counts is
+scenegraph instancing's home turf; PointInstancer trades identity for
+array scale.
+
+\noindent\textbf{41. A} --- it makes the layer referenceable without an
+explicit prim path --- publish-time hygiene.
+
+\noindent\textbf{42. B} --- the namespace question decides it: same prims
+$\Rightarrow$ sublayers; graft under a new path $\Rightarrow$ reference.
+
+\noindent\textbf{43. B} --- bindings that target outside
+\texttt{defaultPrim} survive parsing and die on reference (Sample
+Question 12's trap, automated).
+
+\noindent\textbf{44. B} --- visibility inherits down namespace; an
+\texttt{invisible} ancestor hides the subtree (verified in \S10's listing).
+
+\noindent\textbf{45. A} --- application is recorded in \texttt{apiSchemas}
+metadata; \texttt{HasAPI} is the cheap query (verified in \S5's listing).
+
+\noindent\textbf{46. A} --- mute, observe, unmute: composition re-resolves
+each time; that is what makes it a bisection tool.
+
+\noindent\textbf{47. B} --- triangulation plus axis/unit conversion are the
+two structural fidelity costs; the material model is approximated, not
+shared.
+
+\noindent\textbf{48. A} --- canonical TRS authoring/reading without
+hand-managing \texttt{xformOpOrder}.
+
+\noindent\textbf{49. B} --- \texttt{asset} is the type resolvers and
+dependency walkers see; a \texttt{string} path is invisible to both.
+
+\noindent\textbf{50. B} --- the textbook ChangeBlock case: thousands of
+small writes, one recomposition; reads stay outside the block.
+
+\noindent\textbf{51. A} --- the file-format plug-in interface is exactly how
+USD's own formats are registered; foreign formats join the same way.
+
+\noindent\textbf{52. B} --- selections compose by strength like any opinion;
+Local beats variant-authored. (Sample Question 13, verified by
+composition.)
+
+\noindent\textbf{53. B} --- counts/indices split plus the 1-based to
+0-based shift --- the exact mapping detail the chapter's OBJ importer
+implements.
+
+\noindent\textbf{54. B} --- invisibleIds is per-instance, cheap, reversible
+hiding; arrays stay untouched (the render in \S4 shows the gap).
+
+\noindent\textbf{55. B} --- resolvers locate; they never parse or create
+content (that is file formats and SceneIndex respectively).
+
+\noindent\textbf{56. B} --- roles carry semantics: points transform with
+translation, vectors do not, colors get color management.
+
+\noindent\textbf{57. B} --- warnings on stderr are composition errors in
+disguise; pipelines fail on them at publish, where the fix is cheap.
+
+\noindent\textbf{58. B} --- \texttt{LightAPI} owns the shared dials
+(intensity, color, exposure); \texttt{angle} belongs to DistantLight,
+camera properties to cameras.
+
+\noindent\textbf{59. B} --- typed-and-documented data on \emph{existing}
+prim types across shows is the applied-API-schema case; customData has no
+fallbacks or validation, and a new typed schema is the wrong granularity.
+
+\noindent\textbf{60. B} --- ninety seconds per question on average:
+eliminate fast, mark, return. Time pressure, not difficulty, is the
+most-reported failure mode.

@@ -161,6 +161,78 @@ print(reader.GetIdAttr().Get(),         # UsdPrimvarReader_float3
       reader.GetInput("varname").Get()) # displayColor
 \end{lstlisting}
 
+\subsection{Textures, cameras, and a light}\label{sec:vis-tex}\objref{8.2, 8.4}
+\index{UsdUVTexture}One node upgrades the network from flat color to
+textured: \texttt{UsdUVTexture} reads an image, steered by a \texttt{float2}
+primvar reader for UVs. The same scene carries a camera and a light ---
+prims like everything else:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Scene" )
+def Xform "Scene" {
+    def Mesh "Plate" (
+        prepend apiSchemas = ["MaterialBindingAPI"]
+    )
+    {
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)]
+        texCoord2f[] primvars:st = [(0, 0), (1, 0), (1, 1), (0, 1)] (
+            interpolation = "vertex"
+        )
+        rel material:binding = </Scene/Looks/Checkered>
+    }
+    def Scope "Looks" {
+        def Material "Checkered" {
+            token outputs:surface.connect = </Scene/Looks/Checkered/PBR.outputs:surface>
+            def Shader "PBR" {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor.connect = </Scene/Looks/Checkered/Tex.outputs:rgb>
+                token outputs:surface
+            }
+            def Shader "Tex" {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./checker.png@
+                float2 inputs:st.connect = </Scene/Looks/Checkered/Reader.outputs:result>
+                color3f outputs:rgb
+            }
+            def Shader "Reader" {
+                uniform token info:id = "UsdPrimvarReader_float2"
+                string inputs:varname = "st"
+                float2 outputs:result
+            }
+        }
+    }
+    def Camera "Cam" {
+        float focalLength = 35
+        float2 clippingRange = (0.1, 1000)
+        double3 xformOp:translate = (0, 0, 6)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+    def DistantLight "Sun" {
+        float inputs:intensity = 1000
+    }
+}
+\end{lstlisting}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/c17_textured.png}
+  \caption{The listing rendered with \texttt{usdrecord --camera /Scene/Cam}:
+  \texttt{UsdUVTexture} drives \texttt{diffuseColor}, the authored
+  \texttt{DistantLight} does the lighting, the authored \texttt{Camera}
+  frames the shot --- the whole render pipeline as scene description.}
+  \label{fig:textured}
+\end{figure}
+
+\noindent The chain to memorize: \texttt{primvars:st} $\to$
+\texttt{UsdPrimvarReader\_float2} $\to$ \texttt{UsdUVTexture.st}; the
+texture's \texttt{rgb} output $\to$ \texttt{diffuseColor}. Cameras
+(\texttt{UsdGeomCamera}: \texttt{focalLength}, \texttt{clippingRange},
+projection) and lights complete the picture: a renderer needs nothing that
+is not on the stage.\index{camera}
+
 \subsection{Per-face materials: GeomSubset}\label{sec:vis-subset}\objref{8.3}
 \index{GeomSubset}Different materials on different faces of \emph{one} mesh
 --- no splitting:
