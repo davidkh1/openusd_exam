@@ -71,3 +71,6 @@ __pycache__/
 # Private reference material: exam documents, third-party PDFs, copyrighted
 # books. Never commit.
 ideas/
+
+# Versioned release artifacts (regenerate via tools/release_gate.sh)
+release/*.pdf

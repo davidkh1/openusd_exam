@@ -199,7 +199,32 @@ the official sample-question style, never to dump material.
 - [x] Kindle decision: PDF print-replica first (decision 3, made
       2026-06-11); EPUB only if sales justify it.
 
-## Phase 5 — Release
+## Phase 5 — Release (PREPARED 2026-06-11; deliberately NOT live — heavy
+revision phase continues)
+
+Done:
+- [x] Release gate automated: `tools/release_gate.sh [--figures]` — tests,
+      figure regeneration, build, zero-errors/overfull/undefined checks,
+      versioned PDF into `release/` (gitignored). Run before every
+      distribution.
+- [x] Edition bumped to **v0.10 Beta Edition**; colophon carries a beta
+      notice + feedback/errata link to the GitHub repo (remove the notice at
+      final release).
+- [x] KDP listing draft ready to paste: `release/kdp_listing.md` (title,
+      blurb, keywords, categories, pricing, and the pre-publish checklist —
+      headed DO NOT PUBLISH YET).
+- [x] Beta reader guide: `release/beta_readers.md` (what feedback to send,
+      mock-exam protocol, GitHub issues channel).
+- [x] Errata workflow: `ERRATA.md` template at repo root.
+
+Remaining (human, launch-time):
+- [ ] Author's cold read; declare heavy-revision phase finished.
+- [ ] Final edition number; strip beta notice.
+- [ ] Final cover art decision.
+- [ ] Send beta package; incorporate feedback.
+- [ ] KDP account + publish at $0.99.
+
+## Phase 5 — original checklist
 
 - [ ] Full gate run: build clean, `tools/test_examples.py` green, fact-check
       sign-off per chapter.
