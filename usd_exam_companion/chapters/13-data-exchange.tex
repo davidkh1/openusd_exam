@@ -14,22 +14,361 @@
 \begin{Resources}
   \item Learn OpenUSD: Developing Data Exchange Pipelines
   \item OpenUSD tutorials: Traversing a Stage; Converting Between Layer Formats
+  \item OpenUSD glossary: Over; Stage Traversal
+  \item Technical references: Conceptual Data Mapping; USD FAQ ``What File
+        Format Is My .usd File?''; USDZ File Format Specification
   \item Tooling: \texttt{usdchecker}, \texttt{usdcat}, \texttt{usdzip}
+  \item OpenUSD API: GetNamespace; ComputeExtentFromPlugins; GetExtentAttr
 \end{Resources}
 
 \CheatSheetTitle
 \begin{itemize}[leftmargin=*]
-  \item \textbf{USDA}: readable, diff-friendly; heavier to load/parse.
-  \item \textbf{USDC}: binary crate; faster IO; harder to diff manually.
-  \item \textbf{Round-trip reality}: you will lose data unless you define mapping rules and validation.
-  \item \textbf{Validation}: treat exports like “APIs” — validate schema presence, units, axes, bindings, and paths.
+  \item \textbf{One scene description, three encodings}: \texttt{.usda} is
+        text, \texttt{.usdc} is binary crate, \texttt{.usd} may be
+        \emph{either} --- \texttt{usdcat} tells you which.\index{usda}\index{usdc}
+  \item \textbf{Choosing}: \texttt{usda} for review, diffs, and debugging;
+        \texttt{usdc} for production IO (memory-mapped, lazy, compact);
+        \texttt{usdz} is an uncompressed zip \emph{delivery} package --- not an
+        editing format.\index{usdz}
+  \item \textbf{Exporter skeleton}: traverse $\rightarrow$ filter by schema
+        (\texttt{IsA}) $\rightarrow$ map attributes $\rightarrow$ declare
+        \texttt{defaultPrim}, \texttt{upAxis}, \texttt{metersPerUnit}.\index{traversal}
+  \item \textbf{Traversal skips instances}: \texttt{Traverse()} does not
+        descend into instance proxies unless you ask
+        (\texttt{Usd.TraverseInstanceProxies}).\index{instance proxy}
+  \item \textbf{glTF mapping}: triangulate n-gons; \texttt{primvars:st}
+        $\rightarrow$ \texttt{TEXCOORD\_0}; convert up axis and units (glTF is
+        Y-up, meters); UsdPreviewSurface $\approx$ PBR metallic-roughness.\index{glTF}
+  \item \textbf{Round-trips flatten composition} --- references, variants, and
+        payloads bake on export. Import as \texttt{over}s to stay
+        non-destructive.\index{round-trip}
+  \item \textbf{Nonstandard data}: namespaced custom attributes (a
+        \texttt{myStudio:} prefix) or formalized API
+        schemas.\index{custom attribute}
+  \item \textbf{Validate every export}: \texttt{usdchecker} catches missing
+        stage metadata; authored \texttt{extent} on every Boundable is the
+        exporter's own job.\index{usdchecker}
 \end{itemize}
+
+\section{Core Concepts}
+
+\subsection{What a clean export looks like}\label{sec:de-clean}\objref{4.6, 7.2}
+Everything in this chapter revolves around one exemplar --- a minimal asset
+the way a well-behaved exporter should write it:
+
+\begin{lstlisting}
+#usda 1.0
+(
+    defaultPrim = "Plate"
+    metersPerUnit = 0.01
+    upAxis = "Y"
+)
+def Xform "Plate" (
+    kind = "component"
+)
+{
+    def Mesh "Geom"
+    {
+        float3[] extent = [(-1, 0, -1), (1, 0, 1)]
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [(-1, 0, -1), (1, 0, -1), (1, 0, 1), (-1, 0, 1)]
+        texCoord2f[] primvars:st = [(0, 0), (1, 0), (1, 1), (0, 1)] (
+            interpolation = "vertex"
+        )
+        color3f[] primvars:displayColor = [(0.46, 0.72, 0)]
+        custom float myStudio:wearAmount = 0.25
+    }
+}
+\end{lstlisting}
+
+\noindent Each line earns its place: \texttt{defaultPrim} makes the layer
+referenceable; \texttt{metersPerUnit} and \texttt{upAxis} declare the
+conventions consumers must honor; \texttt{kind = "component"} slots the asset
+into the model hierarchy; \texttt{extent} is authored, not hoped for; the
+\texttt{st} primvar carries UVs with explicit interpolation; and the
+namespaced custom attribute carries studio data without inventing a schema.
+
+\subsection{One format, three encodings}\label{sec:de-enc}\objref{4.3, 7.3}
+\index{crate}\texttt{usda} and \texttt{usdc} (``crate'') encode the same scene
+description. Crate is memory-mapped and lazily read --- opening a multi-GB
+crate layer touches only the bytes composition needs --- and is the production
+default. Text is greppable, diffable, and reviewable. Because \texttt{.usd}
+may contain either encoding, conversion is just re-export:
+
+\begin{lstlisting}[language=Python]
+from pxr import Sdf, Usd
+
+Sdf.Layer.FindOrOpen("asset.usda").Export("asset.usdc")
+
+text  = Usd.Stage.Open("asset.usda")
+crate = Usd.Stage.Open("asset.usdc")
+path = "/Plate/Geom"
+same = (text.GetPrimAtPath(path).GetAttribute("points").Get() ==
+        crate.GetPrimAtPath(path).GetAttribute("points").Get())
+print(same)   # True: same data, different container
+\end{lstlisting}
+
+\begin{ExamTip}
+``What format is my \texttt{.usd} file?'' is a classic. The extension does not
+say --- inspect it: \texttt{usdcat} prints any layer as text, and a crate file
+starts with the magic bytes \texttt{PXR-USDC}. \texttt{usdz} is different
+again: an \emph{uncompressed, 64-byte-aligned zip} that packages a default
+layer plus its dependencies for delivery (think AR QuickLook), built with
+\texttt{usdzip} --- you ship it, you don't edit it.
+\end{ExamTip}
+
+\subsection{The exporter skeleton: traversal}\label{sec:de-trav}\objref{4.7}
+\index{traversal}Every exporter is the same loop: walk the composed stage,
+recognize prims by schema, and map what you find onto the target format.
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd, UsdGeom
+
+stage = Usd.Stage.Open("asset.usda")
+for prim in stage.Traverse():
+    if prim.IsA(UsdGeom.Mesh):
+        mesh = UsdGeom.Mesh(prim)
+        print(prim.GetPath(),
+              len(mesh.GetPointsAttr().Get()),
+              list(mesh.GetFaceVertexCountsAttr().Get()))
+# prints: /Plate/Geom 4 [4]
+\end{lstlisting}
+
+\begin{Gotcha}
+\texttt{stage.Traverse()} visits the composed scenegraph but \textbf{does not
+step inside instances}. If your export of an instanced scene comes out empty,
+that is why: traverse with
+\texttt{Usd.PrimRange(root, Usd.TraverseInstanceProxies())} (or de-instance
+for export). The same trap bites validators.\index{instance proxy}
+\end{Gotcha}
+
+An importer is the mirrored loop --- read the foreign format, create prims,
+set attributes --- with one extra decision that separates good pipelines from
+destructive ones: \emph{author into a new layer, as \texttt{over}s where the
+data refines something that already exists} (see Round-trip pipelines below).
+
+\subsection{Mapping USD to glTF (and friends)}\label{sec:de-map}\objref{4.1, 4.2}
+Conversion quality is decided before any code is written --- in the
+\emph{conceptual data mapping}: which concept on one side corresponds to
+which on the other, and where information is lost.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}[node distance=2.2mm]
+    \node[primbox, minimum width=3.4cm] (u1) {points};
+    \node[primbox, minimum width=3.4cm, below=of u1] (u2) {faceVertexCounts/Indices};
+    \node[primbox, minimum width=3.4cm, below=of u2] (u3) {primvars:st};
+    \node[primbox, minimum width=3.4cm, below=of u3] (u4) {primvars:displayColor};
+    \node[primbox, minimum width=3.4cm, below=of u4] (u5) {UsdPreviewSurface};
+    \node[primbox, minimum width=3.4cm, below=of u5] (u6) {upAxis, metersPerUnit};
+    \node[notetext, above=1.5mm of u1] {USD};
+    \node[primbox, minimum width=3.4cm, right=34mm of u1] (g1) {POSITION};
+    \node[primbox, minimum width=3.4cm, below=of g1] (g2) {indices (triangles only)};
+    \node[primbox, minimum width=3.4cm, below=of g2] (g3) {TEXCOORD\_0};
+    \node[primbox, minimum width=3.4cm, below=of g3] (g4) {COLOR\_0};
+    \node[primbox, minimum width=3.4cm, below=of g4] (g5) {PBR metallic-roughness};
+    \node[primbox, minimum width=3.4cm, below=of g5] (g6) {Y-up, meters (fixed)};
+    \node[notetext, above=1.5mm of g1] {glTF};
+    \draw[refArc] (u1) -- (g1);
+    \draw[payArc] (u2) -- node[arcLabel] {triangulate} (g2);
+    \draw[refArc] (u3) -- node[arcLabel] {rename} (g3);
+    \draw[refArc] (u4) -- (g4);
+    \draw[payArc] (u5) -- node[arcLabel] {approximate} (g5);
+    \draw[payArc] (u6) -- node[arcLabel] {convert} (g6);
+  \end{tikzpicture}
+  \caption{A conceptual mapping at a glance. Solid arrows transfer cleanly;
+  dashed arrows lose or transform information --- exactly what the mapping
+  document must spell out.}
+  \label{fig:gltf-map}
+\end{figure}
+
+The dashed arrows are where fidelity goes to die: glTF accepts only triangles
+(USD n-gons must be triangulated --- topology changes), its coordinate system
+is fixed Y-up/meters (convert or bake a corrective transform), and
+UsdPreviewSurface only \emph{approximates} PBR metallic-roughness (document
+which inputs survive). MaterialX mappings raise the same questions one level
+up: node-graph topology, color spaces, and parameter defaults.\index{MaterialX}
+
+\begin{DeepDive}
+A useful conceptual data mapping document has five tables: (1) prim/schema
+correspondences, (2) attribute-by-attribute mapping with types and units,
+(3) defaults on each side when the other is silent, (4) named features that
+do not survive (with the decision: drop, bake, or sidecar), and (5) naming
+and namespace conventions. Write it before the exporter; review it like an
+API contract --- that is precisely how the exam frames it.
+\end{DeepDive}
+
+\subsection{Round-trip pipelines}\label{sec:de-rt}\objref{4.4, 4.8, 7.4}
+\index{round-trip}Export flattens: the target format has no notion of
+references, variants, payloads, or layer offsets, so composition bakes into
+plain data. The skill being examined is protecting the source of truth on the
+way back in. The pattern: keep the original USD untouched, write the DCC's
+changes into a \emph{new layer}, and author \texttt{over}s\index{over} ---
+sparse opinions that refine existing prims --- rather than re-\texttt{def}ing
+the world. Stronger-layer composition then merges the edit on top of the
+original.
+
+\begin{ExamTip}
+``How do you import without destroying existing data?'' --- the answer is
+some arrangement of: a separate layer for the import, \texttt{over} instead
+of \texttt{def}, and composition (sublayer or reference) to combine. Any
+answer that rewrites the original file is the distractor.
+\end{ExamTip}
+
+\subsection{Nonstandard data}\label{sec:de-nonstd}\objref{4.5, 3.6}
+\index{custom attribute}\index{namespace}Data with no USD schema travels in
+three ways, in increasing order of formality: \texttt{customData} metadata
+(free-form dictionary, no time samples), \emph{namespaced custom attributes}
+(\texttt{custom float myStudio:wearAmount} --- typed, sampled, queryable via
+\texttt{GetPropertiesInNamespace}), and \emph{API schemas} generated with
+\texttt{usdGenSchema}, which give the same data documented names, fallbacks,
+and code-generated accessors (see the Customizing USD domain). Exporters
+should read namespaces they own and ignore the rest; importers should
+round-trip namespaces they do not understand instead of dropping them.
+
+\subsection{Validating exports}\label{sec:de-val}\objref{4.6, 7.7}
+Treat an export like a release artifact. Here is a deliberately broken one:
+
+\begin{lstlisting}
+#usda 1.0
+def Mesh "Plate"
+{
+    int[] faceVertexCounts = [4]
+    int[] faceVertexIndices = [0, 1, 2, 3]
+    point3f[] points = [(-1, 0, -1), (1, 0, -1), (1, 0, 1), (-1, 0, 1)]
+}
+\end{lstlisting}
+
+\noindent It parses, it even renders --- and it is wrong four ways: no
+\texttt{defaultPrim}, no \texttt{upAxis}, no \texttt{metersPerUnit}, no
+\texttt{extent}. The first three are caught mechanically:
+
+\begin{lstlisting}[language=Python]
+from pxr import UsdUtils
+
+checker = UsdUtils.ComplianceChecker()   # the usdchecker engine
+checker.CheckCompliance("bad_export.usda")
+for failure in checker.GetFailedChecks():
+    print(failure)
+\end{lstlisting}
+
+\noindent Three failures, all from \texttt{StageMetadataChecker}: the stage
+does not specify \texttt{upAxis}, does not specify \texttt{metersPerUnit},
+and has a missing or invalid \texttt{defaultPrim}. (Recent USD builds migrate
+\texttt{usdchecker} to the new Validation Framework, flag
+\texttt{--useNewValidationFramework}; the checks carry over.)
+
+The missing \texttt{extent} is the exporter's own responsibility: bounds on
+Boundables are \emph{authored}, not computed on demand, and renderers rely on
+them. Compute and author in one move:\index{extent}
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd, UsdGeom
+
+stage = Usd.Stage.Open("bad_export.usda")
+mesh = UsdGeom.Mesh(stage.GetPrimAtPath("/Plate"))
+extent = UsdGeom.Boundable.ComputeExtentFromPlugins(
+    mesh, Usd.TimeCode.Default())
+mesh.GetExtentAttr().Set(extent)
+print(extent)   # [(-1, 0, -1), (1, 0, 1)]
+\end{lstlisting}
+
+\begin{Gotcha}
+Validation is also where material bindings go to fail quietly: a binding that
+targets a prim \emph{outside} the \texttt{defaultPrim} hierarchy survives
+every parser and dies only when the asset is referenced (Sample Question 12).
+A good validator walks every \texttt{material:binding} and asserts the target
+lives under \texttt{defaultPrim}.
+\end{Gotcha}
 
 \DrillsTitle
 \subsection*{Drill 1: USDA vs USDC choice}
 Write 4 situations where you would mandate one over the other.
 \AnswerLines{7}
+\begin{DrillSolution}
+(1) Code review / version-control diffs of small handwritten layers
+$\Rightarrow$ usda. (2) Production caches, heavy geometry, anything opened at
+scale $\Rightarrow$ usdc (memory-mapped, lazy). (3) Teaching, debugging a
+composition problem, minimal repros $\Rightarrow$ usda. (4) Delivery to a
+consumer device or AR viewer $\Rightarrow$ usdz packaging the usdc payload.
+\end{DrillSolution}
 
 \subsection*{Drill 2: Validator checklist}
-List 10 checks your exporter should do before shipping an asset.
+List 10 checks your exporter should run before shipping an asset.
 \AnswerLines{10}
+\begin{DrillSolution}
+(1) Layer opens with no warnings on stderr. (2) \texttt{defaultPrim} set and
+valid. (3) \texttt{upAxis} declared. (4) \texttt{metersPerUnit} declared.
+(5) Every Boundable has an authored \texttt{extent}. (6) Topology consistent:
+$\sum$\texttt{faceVertexCounts} $=$ \texttt{len(faceVertexIndices)}, indices
+in range of \texttt{points}. (7) Material bindings target prims under
+\texttt{defaultPrim}. (8) Primvar interpolation matches element counts.
+(9) Asset paths resolve (no absolute local paths). (10) Naming/namespace
+conventions hold; unknown namespaces preserved, not dropped.
+\end{DrillSolution}
+
+\subsection*{Drill 3: glTF fidelity risks}
+Name 4 ways a USD$\rightarrow$glTF conversion silently loses fidelity, and
+the mitigation for each.
+\AnswerLines{7}
+\begin{DrillSolution}
+(1) N-gons triangulated $\Rightarrow$ export consistent winding/normals and
+validate visually. (2) Up-axis/units differ $\Rightarrow$ convert vertices or
+bake one corrective root transform, never both. (3) Materials approximated
+$\Rightarrow$ document which UsdPreviewSurface inputs map to PBR
+metallic-roughness and bake the rest to textures. (4) Primvars renamed or
+dropped (\texttt{st} $\rightarrow$ \texttt{TEXCOORD\_0}, extra UV sets,
+\texttt{displayColor}) $\Rightarrow$ explicit mapping table in the conceptual
+mapping document.
+\end{DrillSolution}
+
+\subsection*{Drill 4: Non-destructive import design}
+Sketch the layer/composition design for importing a DCC edit of an existing
+USD asset without touching the original.
+\AnswerLines{6}
+\begin{DrillSolution}
+New layer per import session; the importer authors \texttt{over}s on the
+existing prim paths (and \texttt{def}s only for genuinely new prims); the
+shot stage sublayers (or references) the import layer \emph{above} the
+original so its opinions win; the original asset file is never reopened for
+writing. Bonus: record provenance in \texttt{customData}.
+\end{DrillSolution}
+
+\section*{Checkpoint Questions}
+\addcontentsline{toc}{section}{Checkpoint Questions}
+
+\noindent\textbf{CQ1.} One asset must be (a) reviewed line-by-line in a PR,
+(b) loaded fast in production, (c) delivered to an AR viewer. Which encoding
+each time?
+\begin{DrillSolution}
+(a) usda --- text diffs; (b) usdc --- memory-mapped crate; (c) usdz --- the
+zip delivery package (containing crate data).
+\end{DrillSolution}
+
+\noindent\textbf{CQ2.} Your exporter reports zero meshes on a scene full of
+instanced buildings. Why, and what is the fix?
+\begin{DrillSolution}
+\texttt{Traverse()} does not descend into instances. Traverse with
+\texttt{Usd.PrimRange(root, Usd.TraverseInstanceProxies())}, or de-instance
+for export. The data was always there --- the iterator skipped it.
+\end{DrillSolution}
+
+\noindent\textbf{CQ3.} Who is responsible for \texttt{extent}, and which API
+computes it?
+\begin{DrillSolution}
+The authoring side --- whoever wrote the points. Bounds are authored data,
+not derived on demand:
+\texttt{UsdGeom.Boundable.ComputeExtentFromPlugins(boundable, time)}, then
+\texttt{GetExtentAttr().Set(...)}. Update it whenever points change (compare
+Sample Question 5).
+\end{DrillSolution}
+
+\subsection*{Mini-checklist (tick when mastered)}
+\begin{itemize}[leftmargin=*]
+  \item[$\square$] I can tell what is inside a \texttt{.usd} file without trusting the extension.
+  \item[$\square$] I can write the traversal loop of an exporter from memory --- including the instancing trap.
+  \item[$\square$] I can name the lossy edges of a USD$\rightarrow$glTF mapping before writing code.
+  \item[$\square$] I can design an import that leaves the original asset byte-identical.
+  \item[$\square$] I can list what \texttt{usdchecker} catches --- and what stays my job (\texttt{extent}).
+\end{itemize}

@@ -17,42 +17,424 @@
 \begin{Resources}
   \item Learn OpenUSD: Creating Composition Arcs
   \item OpenUSD tutorials: Referencing Layers; Authoring Variants
-  \item OpenUSD glossary: LIVERPS, Sublayers, Variant Sets, References, Payloads, Layer Offsets, Edit Target, Flatten
-  \item OpenUSD API: Scenegraph Instancing; UsdEditTarget; UsdStage::Flatten; UsdReferences
+  \item OpenUSD glossary: LIVRPS (LIVERPS), Sublayers, Variant Sets, References, Payloads, Layer Offsets, Edit Target, Flatten
+  \item OpenUSD API: Scenegraph Instancing; UsdEditTarget; UsdReferences; UsdStage::Flatten
 \end{Resources}
 
 \CheatSheetTitle
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Strength} in composition: stronger opinions override weaker ones.
-  \item \textbf{LIVERPS} (common debugging lens): \textbf{L}ocal, \textbf{I}nherits, \textbf{V}ariants, \textbf{R}eferences, \textbf{P}ayload, \textbf{S}ublayers.
-  \item \textbf{Sublayers}: stack whole layers; great for “edits on top”, shots, departments.
-  \item \textbf{References}: bring in prim specs; good for asset assembly and reuse.
-  \item \textbf{Payloads}: like references but can be deferred/unloaded for performance.
-  \item \textbf{Variants}: discrete mutually exclusive choices; avoid using as a “parameter bag”.
-  \item \textbf{Layer offsets}: time offset/scale on a reference for re-timing.
-  \item \textbf{Debug habit}: ask “where is the strongest authored opinion and what arc brought it here?”
+  \item \textbf{Strength rules everything}: for each property, the strongest authored opinion wins outright --- opinions never merge.\index{opinion}
+  \item \textbf{LIVRPS}\index{LIVRPS} strength order: \textbf{L}ocal, \textbf{I}nherits, \textbf{V}ariantSets, \textbf{R}eferences, \textbf{P}ayload, \textbf{S}pecializes (NVIDIA materials sometimes write \emph{LIVERPS}).
+  \item \textbf{Sublayers are not the S} --- sublayer opinions count as \emph{Local}. Within a layer stack: root layer first, then sublayers in list order.\index{sublayer}
+  \item \textbf{References}\index{reference} graft a prim subtree (via \texttt{defaultPrim} or an explicit prim path); earlier list entries are stronger.
+  \item \textbf{Payloads}\index{payload} are references you can load/unload for working-set control; composed just after (weaker than) references.
+  \item \textbf{Variants}\index{variant set}: discrete, asset-owned switches; the \emph{selections} themselves compose by strength too.
+  \item \textbf{Layer offsets}\index{layer offset}: $\text{stage time} = \text{source time} \times \text{scale} + \text{offset}$; re-time referenced animation without touching it.
+  \item \textbf{Debug habit}: ask ``where is the strongest authored opinion, and which arc carried it here?''
 \end{itemize}
 
+\section{Core Concepts}
+
+\subsection{Layer stacks and sublayers}\label{sec:c-stacks}\objref{1.1, 1.5}
+\index{layer stack}A stage opens a \emph{root layer}; the root layer plus its
+\texttt{subLayers} (recursively) form the \emph{layer stack}. Everything
+authored anywhere in that stack is a \emph{Local} opinion --- the strongest
+class in LIVRPS. Within the stack, the root layer wins first, then sublayers
+in list order: earlier entry, stronger opinion.
+
+\begin{lstlisting}
+#usda 1.0
+(
+    subLayers = [
+        @./lighting.usda@,
+        @./layout.usda@
+    ]
+)
+\end{lstlisting}
+
+\noindent\textbf{layout.usda} defines the ball; \textbf{lighting.usda} sits
+earlier in the list, so its override wins:
+
+\begin{lstlisting}
+#usda 1.0
+def Sphere "Ball" {
+    double radius = 1
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+#usda 1.0
+over "Ball" {
+    double radius = 3
+}
+\end{lstlisting}
+
+\noindent Composed \texttt{radius} on \texttt{/Ball}: \textbf{3}.
+
+\begin{ExamTip}
+Sublayering is the multi-user pattern: one shot stage, one sublayer per
+department (lighting above animation above layout). Each person owns a file;
+strength comes from list position, and nobody edits anyone else's layer.
+\end{ExamTip}
+
+\subsection{References and \texttt{defaultPrim}}\label{sec:c-refs}\objref{1.3}
+\index{reference}\index{defaultPrim}A reference grafts a prim subtree from
+another layer (or the same layer) onto the referencing prim. Reference a
+\emph{layer} without a prim path and USD uses the layer's
+\texttt{defaultPrim} metadata to decide what to graft; reference with an
+explicit path (\texttt{@file.usda@</Some/Prim>}) and \texttt{defaultPrim} is
+ignored.
+
+\begin{Gotcha}
+\objref{6.3}A layer that is meant to be referenced \textbf{must set \texttt{defaultPrim}}
+(or every consumer must spell out a prim path). Without it, composition
+reports ``\emph{Unresolved reference prim path} \ldots
+\texttt{<defaultPrim>}'' and the reference contributes nothing --- the stage
+still opens, which is exactly why this bug slips through. Same story for
+payloads.
+\end{Gotcha}
+
+Multiple references on one prim form a list; like sublayers, \emph{earlier
+entries are stronger}. List-editing (\texttt{prepend}, \texttt{append},
+\texttt{delete}) controls where new arcs land relative to arcs composed from
+weaker layers.
+
+\subsection{Payloads: references you can unload}\label{sec:c-payloads}\objref{1.3}
+\index{payload}A payload behaves like a reference with one superpower: the
+consumer controls whether its contents are composed at all. Open a stage with
+\texttt{LoadNone} and payloads stay collapsed --- prims beneath them simply do
+not exist on the stage until you load them.
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Block" )
+def Xform "Block" {
+    def Sphere "Hydrant" {
+        double radius = 0.3
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "City" )
+def Xform "City" {
+    def "Block_01" (
+        prepend payload = @./block.usda@
+    )
+    {
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd
+
+stage = Usd.Stage.Open("city.usda", Usd.Stage.LoadNone)
+hydrant = stage.GetPrimAtPath("/City/Block_01/Hydrant")
+print(hydrant.IsValid())   # False
+
+stage.Load("/City/Block_01")
+hydrant = stage.GetPrimAtPath("/City/Block_01/Hydrant")
+print(hydrant.IsValid())   # True
+\end{lstlisting}
+
+\begin{ExamTip}
+Defaults matter: \texttt{Usd.Stage.Open()} loads \emph{all} payloads
+(\texttt{LoadAll}). Choose payload over reference when contents are heavy and
+optional for some consumers: set dressing, LOD-heavy props, anything a layout
+artist wants to skip. Structure that must always exist belongs in a reference.
+\end{ExamTip}
+
+\subsection{Variant sets}\label{sec:c-variants}\objref{1.7}
+\index{variant set}A variant set is a named, asset-owned switch with mutually
+exclusive variants: \texttt{modelingVariant}, \texttt{lodVariant},
+\texttt{loftedColor}. Opinions inside the selected variant compose at
+\emph{VariantSets} strength --- below Local. The selection itself
+(\texttt{variants = \{ \ldots \}}) is also just an opinion and composes by
+strength like any other.
+
+\begin{Gotcha}
+``I selected the variant but nothing changed'' usually means a stronger layer
+already authors the same selection or the same property. A \emph{Local}
+selection in the stage's root layer stack beats a selection authored inside
+another (even stronger-looking) variant --- this exact trap appears in the
+sample questions.
+\end{Gotcha}
+
+Variants are \emph{wrong} for continuous parameters (use attributes), for
+per-shot/per-department overrides (use layers), and for combinatorial
+explosions (use several small variant sets or attributes instead of one
+mega-set).
+
+Figure~\ref{fig:usdview-variant} shows the trap from the Gotcha above live in
+\texttt{usdview} (it is the scenario of Sample Question 13):
+\texttt{loftedColor = blue} is selected, yet every panel agrees the cube is
+red.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0] (img)
+      {\includegraphics[width=0.95\linewidth]{figures/c10_usdview_variant.png}};
+    \begin{scope}[x={(img.south east)}, y={(img.north west)}]
+      \node[notetext, draw=arcPay!85!black, fill=white, rounded corners=1pt,
+            text width=0.27\linewidth, align=left] at (0.73,0.67)
+        {composed result: red --- the \texttt{blue} selection never lands};
+      \node[notetext, draw=arcVar, fill=white, rounded corners=1pt,
+            text width=0.24\linewidth, align=left] (dc) at (0.33,0.52)
+        {composed \texttt{primvars:}\\\texttt{displayColor} $= (1,0,0)$};
+      \draw[varArc] (dc.south) -- (0.33,0.295);
+      \node[notetext, draw=arcRef, fill=white, rounded corners=1pt,
+            text width=0.25\linewidth, align=left] (tabs) at (0.78,0.30)
+        {debug here: \emph{Layer Stack} and \emph{Composition} tabs};
+      \draw[refArc] (tabs.north) -- (0.84,0.415);
+    \end{scope}
+  \end{tikzpicture}
+  \caption{usdview on the variant-trap stage with \texttt{Cube} selected. The
+  viewport and the composed \texttt{primvars:displayColor} agree on red; when
+  an override ``does not take effect'', the \emph{Layer Stack} and
+  \emph{Composition} tabs show which layer and arc actually won.}
+  \label{fig:usdview-variant}
+\end{figure}
+
+\subsection{Layer offsets: re-timing references}\label{sec:c-offsets}\objref{1.4}
+\index{layer offset}A reference (or sublayer) can carry a \emph{layer
+offset}: \texttt{(offset = \ldots; scale = \ldots)}. Time-sampled values from
+the target are mapped by
+$\text{stage time} = \text{source time} \times \text{scale} + \text{offset}$.
+The same animation can appear many times, each copy on its own clock:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Ball" )
+def Sphere "Ball" {
+    double3 xformOp:translate.timeSamples = {
+        1: (0, 0, 0),
+        24: (23, 0, 0),
+    }
+    uniform token[] xformOpOrder = ["xformOp:translate"]
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Shot" )
+def Xform "Shot" {
+    def "BallA" (
+        prepend references = @./anim.usda@
+    )
+    {
+    }
+    def "BallB" (
+        prepend references = @./anim.usda@ (offset = 10)
+    )
+    {
+    }
+    def "BallC" (
+        prepend references = @./anim.usda@ (scale = 2)
+    )
+    {
+    }
+}
+\end{lstlisting}
+
+\noindent At stage time 12 (verified by composing this stage):
+\texttt{BallA} is at $(11,0,0)$ --- raw animation;
+\texttt{BallB} is at $(1,0,0)$ --- the clip started 10 frames later;
+\texttt{BallC} is at $(5,0,0)$ --- the clip plays at half speed.
+Figure~\ref{fig:offsets-render} is this exact stage rendered with
+\texttt{usdrecord} at time 12.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0] (img)
+      {\includegraphics[width=\linewidth]{figures/c10_offsets_t12.png}};
+    \begin{scope}[x={(img.south east)}, y={(img.north west)}]
+      \node[notetext, draw=arcRef, fill=white, rounded corners=1pt]
+        (lb) at (0.15,0.84) {\texttt{BallB} --- offset 10: $x{=}1$};
+      \draw[refArc] (lb.south) -- (0.105,0.625);
+      \node[notetext, draw=arcPay, fill=white, rounded corners=1pt]
+        (lc) at (0.46,0.84) {\texttt{BallC} --- scale 2: $x{=}5$};
+      \draw[payArc] (lc.south) -- (0.415,0.625);
+      \node[notetext, draw=usdgreen!60!black, fill=white, rounded corners=1pt]
+        (la) at (0.82,0.84) {\texttt{BallA} --- raw: $x{=}11$};
+      \draw[subArc] (la.south) -- (0.895,0.625);
+    \end{scope}
+  \end{tikzpicture}
+  \caption{One animation file on three clocks: the layer-offset stage rendered
+  with \texttt{usdrecord} at stage time 12. Colors are added by overrides in a
+  stronger wrapper layer --- composition at work even in the figure.}
+  \label{fig:offsets-render}
+\end{figure}
+
+\begin{ExamTip}
+Offsets re-map \emph{time samples}, not default values. A non-animated
+attribute looks identical under any layer offset --- a favorite distractor.
+\end{ExamTip}
+
+\subsection{LIVRPS: deciding who wins}\label{sec:c-livrps}\objref{1.6, 1.1}
+\index{LIVRPS}For any prim, USD consults opinion sources in LIVRPS order ---
+and the rule applies \emph{recursively}: inside each arc's target, the same
+ordering runs again on that target's own layer stack and arcs.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}[node distance=2.6mm]
+    \node[strengthbox, draw=usdgreen!60!black, fill=layerFill] (L)
+      {\textbf{L}ocal --- direct opinions in the layer stack: root layer, then sublayers in order};
+    \node[strengthbox, draw=arcInh, below=of L] (I)
+      {\textbf{I}nherits --- broadcast edits to every prim that inherits the class};
+    \node[strengthbox, draw=arcVar, below=of I] (V)
+      {\textbf{V}ariantSets --- opinions inside the selected variant};
+    \node[strengthbox, draw=arcRef, below=of V] (R)
+      {\textbf{R}eferences --- earlier list entries beat later ones};
+    \node[strengthbox, draw=arcPay, below=of R] (P)
+      {\textbf{P}ayload --- a reference the consumer may not even load};
+    \node[strengthbox, draw=arcSpec, below=of P] (S)
+      {\textbf{S}pecializes --- always the weakest fallback};
+    \node[notetext, anchor=south west] at ($(L.north west)+(0,1.2mm)$) {strongest};
+    \node[notetext, anchor=north west] at ($(S.south west)+(0,-1.2mm)$) {weakest};
+  \end{tikzpicture}
+  \caption{LIVRPS opinion strength. Pronounced ``liver peas''; NVIDIA materials
+  sometimes spell it LIVERPS. Sublayers are not the S --- they live inside
+  \emph{Local}.}
+  \label{fig:livrps}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[layerbox] (root) {shot.usda};
+    \node[layerbox, below=3mm of root] (sub1) {lighting.usda};
+    \node[layerbox, below=3mm of sub1] (sub2) {layout.usda};
+    \node[notetext, above=1.5mm of root] {root layer stack (Local)};
+    \draw[subArc] (root.west) to[bend right=40] (sub1.west);
+    \draw[subArc] (sub1.west) to[bend right=40] (sub2.west);
+    \node[layerbox, right=32mm of root] (chair) {chair.usda};
+    \node[layerbox, below=9mm of chair] (geo) {chair\_geo.usda};
+    \draw[refArc] (root.east) -- node[arcLabel] {reference} (chair.west);
+    \draw[payArc] (chair) -- node[notetext, midway, right=1.5mm] {payload} (geo);
+  \end{tikzpicture}
+  \caption{One composed stage, three mechanisms: the layer stack supplies
+  Local opinions; arcs graft other layer stacks in --- each composed by its
+  own LIVRPS pass.}
+  \label{fig:arcs}
+\end{figure}
+
+\begin{DeepDive}
+LIVRPS orders \emph{arc classes within one layer stack}. Two extra rules
+settle everything else: within a class, list order decides (sublayer order,
+reference order); and ancestral arcs are weaker than the same class introduced
+closer to the prim. When debugging, walk the chain: which layer authored the
+winning opinion, and which sequence of arcs carried it to this prim?
+\end{DeepDive}
+
+\begin{FieldNote}
+Test-takers consistently report that LIVRPS scenarios dominate the exam ---
+and that there is no usdview in the room. Train the muscle this chapter
+builds: predict the composed value from the layers alone, \emph{then}
+verify. The checkpoint questions below are designed to be solved blind.
+\end{FieldNote}
+
+\subsection{Edit targets and delivery}\label{sec:c-edit}\objref{1.9, 1.11}
+\index{edit target}\index{flatten}Every authored opinion lands in the layer
+selected by the stage's \emph{edit target} --- the root layer by default.
+Retargeting (\texttt{UsdEditTarget}) is how tools write into a session layer,
+a specific sublayer, or inside a variant without the user thinking about
+files.
+
+To ship an asset outside the studio, \emph{flatten} it:
+\texttt{UsdStage::Flatten()} (or \texttt{usdcat --flatten}) bakes the composed
+result into a single layer. Composed values survive; composition structure,
+internal paths, and per-arc overridability do not --- which is exactly what
+you want at a trust boundary.\index{usdcat}
+
+\begin{ExamTip}
+``Prepare an internal asset for external delivery'' $\Rightarrow$ flatten (and
+package with \texttt{usdzip} when textures must travel along). ``Split a
+monolithic asset for collaboration'' $\Rightarrow$ the reverse: break it into
+referenced layers with clear ownership.
+\end{ExamTip}
+
 \DrillsTitle
-\subsection*{Drill 1: LIVERPS in 60 seconds}
-Given three layers (sublayer + reference + local override), state which wins for a single attribute and why.
+\subsection*{Drill 1: LIVRPS in 60 seconds}
+Given three layers (sublayer + reference + local override), state which wins
+for a single attribute and why.
 \AnswerLines{6}
+\begin{DrillSolution}
+Local override first --- it is the strongest class. The sublayer comes second:
+sublayer opinions are still \emph{Local}, just below the root layer within the
+stack. The reference is last (R sits below L in LIVRPS). Key insight: a
+sublayer beats a reference \emph{because} sublayers are Local.
+\end{DrillSolution}
 
 \subsection*{Drill 2: Reference vs Payload decision}
-Write 3 criteria when you choose payload instead of reference.
+Write 3 criteria for choosing payload instead of reference.
 \AnswerLines{6}
+\begin{DrillSolution}
+(1) Contents are heavy and not always needed --- consumers want
+\texttt{LoadNone}/\texttt{Load} working-set control. (2) The prim is optional
+for some workflows (set dressing, LOD-heavy props) rather than structural.
+(3) Assembly-scale stages where opening everything eagerly is too expensive.
+Structure that must always compose stays a reference.
+\end{DrillSolution}
 
 \subsection*{Drill 3: Variant misuse}
 List 3 signs you are abusing variants (and what to use instead).
 \AnswerLines{6}
+\begin{DrillSolution}
+(1) Variants encoding a continuous value (\texttt{height\_1m},
+\texttt{height\_2m}, \ldots) --- use an attribute. (2) Per-shot or
+per-department choices baked into the asset --- use layers and sublayer
+strength. (3) One mega-variant-set with a combinatorial explosion of
+combinations --- use several orthogonal variant sets or attributes.
+\end{DrillSolution}
 
 \subsection*{Drill 4: Time-offset reasoning}
 Explain how to reference the same animation twice with different start times.
 \AnswerLines{6}
+\begin{DrillSolution}
+Author two prims, each referencing the same animation layer, and give each
+reference its own layer offset: \texttt{@anim.usda@ (offset = N)} shifts the
+clip to start N frames later; add \texttt{scale} to re-speed it. Mapping:
+stage time $=$ source time $\times$ scale $+$ offset. Only time samples
+re-map; default values are unaffected.
+\end{DrillSolution}
+
+\section*{Checkpoint Questions}
+\addcontentsline{toc}{section}{Checkpoint Questions}
+
+\noindent\textbf{CQ1.} In the sublayer example above, the root layer
+\texttt{shot.usda} additionally authors \texttt{double radius = 5} directly on
+\texttt{/Ball}. What composes?
+\begin{DrillSolution}
+\textbf{5.} Root-layer opinions are the strongest Local opinions; sublayers
+follow in list order (lighting's 3 would win only if the root stayed silent).
+\end{DrillSolution}
+
+\noindent\textbf{CQ2.} In the layer-offset example, what is
+\texttt{BallB}'s translate at stage time 24?
+\begin{DrillSolution}
+$(13, 0, 0)$. Offset 10 maps stage time 24 to source time 14; interpolating
+the samples $1 \mapsto 0$ and $24 \mapsto 23$ at source time 14 gives 13.
+\end{DrillSolution}
+
+\noindent\textbf{CQ3.} A prim references \texttt{[base.usda, override.usda]}
+and both author \texttt{primvars:displayColor}; no stronger layer says
+anything. Which value wins?
+\begin{DrillSolution}
+\texttt{base.usda} --- within one arc class, \emph{earlier list entries are
+stronger}. (To make \texttt{override.usda} win, prepend it, or author the
+override at Local strength instead.)
+\end{DrillSolution}
 
 \subsection*{Mini-checklist (tick when mastered)}
 \begin{itemize}[leftmargin=*]
   \item[$\square$] I can predict which layer wins for any single attribute.
-  \item[$\square$] I can explain defaultPrim and why it matters for referencing.
-  \item[$\square$] I can explain “why my override doesn’t take effect” without guessing.
+  \item[$\square$] I can explain \texttt{defaultPrim} and why referencing breaks without it.
+  \item[$\square$] I can recite LIVRPS and place sublayers correctly inside Local.
+  \item[$\square$] I can compute a layer-offset time mapping in my head.
+  \item[$\square$] I can explain ``why my override doesn't take effect'' without guessing.
 \end{itemize}

@@ -1,0 +1,55 @@
+\title{OpenUSD Exam Companion}
+\newcommand{\booksubtitle}{NCP-OUSD Prep Notes and Tested Examples}
+% \newcommand{\booktagline}{Cheat sheets, drills, tested examples, and original practice questions}
+\newcommand{\booklicense}{Creative Commons Attribution--NonCommercial--NoDerivatives 4.0 International (CC BY-NC-ND 4.0)}
+\author{David Khosid}
+\newcommand{\edition}{v0.02 Edition}
+
+\makeatletter
+\newcommand{\booktitle}{\@title}
+\newcommand{\bookauthor}{\@author}
+\makeatother
+
+\usepackage[utf8]{inputenc}
+\usepackage{fix-cm}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{makeidx}
+\makeindex
+
+\usepackage[bindingoffset=0.625in,
+            left=.5in, right=.5in,
+            top=.8125in, bottom=.9375in,
+            marginparwidth=27pt, marginparsep=5pt,
+            paperwidth=6.375in, paperheight=9.25in]{geometry}
+\usepackage{marginnote}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  pdftitle={OpenUSD Exam Companion},
+  pdfauthor={David Khosid}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\nouppercase{\rightmark}}
+\fancyhead[RE]{\nouppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlist[itemize]{itemsep=2pt, topsep=3pt}
+
+% Avoid fancyhdr headheight warnings
+\setlength{\headheight}{14pt}

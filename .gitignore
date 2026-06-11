@@ -13,12 +13,12 @@ Thumbs.db
 *~
 
 # -------------------------
-# PDFs (exclude outputs like main.pdf)
+# LaTeX-compiled output PDFs (reference PDFs elsewhere stay tracked)
 # -------------------------
-*.pdf
+usd_exam_companion/*.pdf
 
 # -------------------------
-# LaTeX build artefacts
+# LaTeX build artifacts
 # -------------------------
 *.aux
 *.auxlock
@@ -62,3 +62,12 @@ Thumbs.db
 # Build dirs
 _build/
 build/
+
+# Python venv (for testing USD examples with usd-core)
+.venv/
+.pytest_cache/
+__pycache__/
+
+# Private reference material: exam documents, third-party PDFs, copyrighted
+# books. Never commit.
+ideas/

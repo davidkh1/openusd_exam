@@ -2,37 +2,252 @@
 
 \begin{Objectives}
   \item Add a new prototype to a \texttt{UsdGeomPointInstancer}.
-  \item Edit an \texttt{instanceProxy} mesh (e.g., colour) without breaking instancing.
+  \item Edit an \texttt{instanceProxy} mesh (e.g., color) without breaking instancing.
   \item Hide PointInstancer instances efficiently.
   \item Implement/manage USD instances for reuse in large scenes.
   \item Remove properties from instanced component prims in an assembly stage.
 \end{Objectives}
 
 \begin{Resources}
-  \item Learn OpenUSD: Asset Modularity and Instancing
-  \item OpenUSD API: Scenegraph Instancing; UsdGeomPointInstancer
+  \item Learn OpenUSD: Understanding Model Kinds; Asset Structure Principles
+        and Content Aggregation; Asset Modularity and Instancing
+  \item OpenUSD API: Scenegraph Instancing; Kind --- The Core Kind Hierarchy;
+        Model Hierarchy; UsdGeomPointInstancer
 \end{Resources}
 
 \CheatSheetTitle
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Two main mechanisms}: scenegraph instancing (native instancing) vs PointInstancer (many instances of prototypes).
-  \item \textbf{PointInstancer}: instances are lightweight; per-instance transforms/visibility via arrays.
-  \item \textbf{instanceProxy}: lets you target inside an instance without flattening it.
-  \item \textbf{Don’t break instancing}: avoid authoring edits that force unique topology/material networks per instance unless intended.
-  \item \textbf{Hiding instances}: usually via instance indices/visibility masks rather than duplicating geometry.
+  \item \textbf{Two mechanisms}: \emph{scenegraph instancing}
+        (\texttt{instanceable = true} on composition arcs --- full prims,
+        shared prototype) and \emph{PointInstancer} (arrays of points
+        indexing prototypes --- massive counts).\index{instancing}
+  \item \textbf{Sharing is the point}: all instances of the same arc share
+        one prototype; memory and composition cost stay flat as counts grow.
+  \item \textbf{Instance proxies are read-only}: paths inside an instance
+        exist for \emph{querying}; authoring there raises an
+        error.\index{instance proxy}
+  \item \textbf{Edit all instances}: edit the prototype's source (the asset,
+        or an \texttt{over} above it). \textbf{Edit one}: make that instance
+        \texttt{instanceable = false}, then author normally.
+  \item \textbf{The instance root itself is editable} --- transform it, bind
+        materials on it, block properties on it; only its \emph{descendants}
+        are proxies.
+  \item \textbf{PointInstancer data layout}: \texttt{prototypes} (rel) +
+        \texttt{protoIndices} + \texttt{positions} (+ optional orientations,
+        scales, velocities, ids).\index{PointInstancer}
+  \item \textbf{Hide PI instances} with \texttt{invisibleIds} --- no geometry
+        edits, no re-authoring of arrays.\index{invisibleIds}
 \end{itemize}
 
+\section{Core Concepts}
+
+\subsection{Scenegraph instancing}\label{sec:ca-sg}\objref{2.4, 1.2}
+Mark a composition arc \texttt{instanceable} and USD composes its contents
+\emph{once}, as a prototype every instance shares:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Tree" )
+def Xform "Tree" {
+    def Sphere "Crown" {
+        color3f[] primvars:displayColor = [(0, 0.5, 0)]
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Forest" )
+def Xform "Forest" {
+    def "Tree_01" (
+        prepend references = @./tree.usda@
+        instanceable = true
+    )
+    {
+    }
+    def "Tree_02" (
+        prepend references = @./tree.usda@
+        instanceable = true
+    )
+    {
+    }
+}
+\end{lstlisting}
+
+\noindent Both trees compose against the same prototype --- 10 or 10{,}000
+instances cost roughly the same. The price: what is inside an instance is
+\emph{shared}, so it cannot be edited per-instance in place.
+
+\subsection{Editing around instances}\label{sec:ca-edit}\objref{2.2}
+The paths inside an instance still exist --- as \emph{instance proxies},
+queryable but not authorable. Everything this listing claims is
+test-verified:
+
+\begin{lstlisting}[language=Python]
+from pxr import Tf, Usd
+
+stage = Usd.Stage.Open("forest.usda")
+crown = stage.GetPrimAtPath("/Forest/Tree_01/Crown")
+print(crown.IsInstanceProxy())                     # True
+try:
+    crown.GetAttribute("primvars:displayColor").Set([(1, 0, 0)])
+except Tf.ErrorException:
+    print("cannot author on an instance proxy")    # this prints
+
+# Recolor EVERY tree: edit what the prototype composes from.
+tree = Usd.Stage.Open("tree.usda")
+tree.GetPrimAtPath("/Tree/Crown").GetAttribute(
+    "primvars:displayColor").Set([(0.8, 0.5, 0.1)])   # autumn
+
+# Recolor ONE tree: opt it out of instancing, then author normally.
+stage.GetPrimAtPath("/Forest/Tree_01").SetInstanceable(False)
+stage.GetPrimAtPath("/Forest/Tree_01/Crown").GetAttribute(
+    "primvars:displayColor").Set([(0, 0.4, 0)])       # evergreen again
+\end{lstlisting}
+
+\begin{Gotcha}
+\objref{1.10, 2.5}``Remove properties from instanced component prims in an assembly stage''
+(an exam objective, verbatim) has the same two-track answer: opinions that
+target \emph{descendants} of an instance must go to the prototype's source
+(an \texttt{over} in a stronger layer on the asset), or the instance must be
+de-instanced first. Only the instance \emph{root} prim accepts direct edits
+--- transforms, material bindings, property blocks.
+\end{Gotcha}
+
+\begin{ExamTip}
+What silently breaks instancing at scale: making instances
+non-\texttt{instanceable} one by one ``just for this edit'', unique material
+networks per instance, and per-instance topology overrides. Each one forks a
+prototype. The design answer is usually a \emph{variant} on the asset or a
+primvar consumed by a shared material --- not a thousand bespoke copies.
+\end{ExamTip}
+
+\subsection{PointInstancer: instancing as arrays}\label{sec:ca-pi}\objref{2.1, 2.3}
+\index{PointInstancer}When counts get huge (foliage, debris, crowds), prim
+overhead itself is the enemy. \texttt{UsdGeomPointInstancer} stores instances
+as parallel arrays --- one entry per instance --- indexing into a small set
+of prototype prims:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Scatter" )
+def PointInstancer "Scatter" {
+    point3f[] positions = [(0, 0, 0), (2, 0, 0), (4, 0, 0), (6, 0, 0)]
+    int[] protoIndices = [0, 1, 0, 1]
+    int64[] invisibleIds = [2]
+    rel prototypes = [</Scatter/Protos/Bush>, </Scatter/Protos/Rock>]
+    def Scope "Protos" {
+        def Sphere "Bush" {
+            color3f[] primvars:displayColor = [(0.2, 0.6, 0.1)]
+        }
+        def Cube "Rock" {
+            double size = 1.2
+            color3f[] primvars:displayColor = [(0.5, 0.5, 0.55)]
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figures/c11_scatter.png}
+  \caption{The PointInstancer above, rendered with \texttt{usdrecord}: four
+  entries in \texttt{positions}, three instances drawn ---
+  \texttt{invisibleIds = [2]} hides the third (the bush that would sit at
+  $x{=}4$) without touching any array.}
+  \label{fig:scatter}
+\end{figure}
+
+\noindent\textbf{Adding a prototype} is two edits: append its prim to the
+\texttt{prototypes} relationship (its position in the target list is its
+index) and use that index in \texttt{protoIndices}.
+\textbf{Hiding instances} is one edit: put their ids into
+\texttt{invisibleIds} --- by default an instance's id \emph{is} its array
+position, unless an explicit \texttt{ids} array says otherwise. No geometry
+is deleted, no arrays re-authored, and unhiding is removing the id again.
+
+\begin{DeepDive}
+\objref{1.2}Choosing a mechanism is a scale question. Scenegraph instancing keeps full
+prim identity (each instance root is a real prim you can transform, bind,
+query) --- right for dozens-to-thousands of structured assets. PointInstancer
+gives up per-instance prims entirely for per-instance \emph{array data} ---
+right for thousands-to-millions of scatter items. They compose: a forest
+PointInstancer whose prototypes are themselves instanceable assets.
+\end{DeepDive}
+
 \DrillsTitle
-\subsection*{Drill 1: “What breaks instancing?”}
+\subsection*{Drill 1: ``What breaks instancing?''}
 List 5 edits that commonly de-instance things.
 \AnswerLines{7}
+\begin{DrillSolution}
+(1) Setting \texttt{instanceable = false} to make ``one quick edit''.
+(2) Authoring overrides that need to land on instance descendants, forcing
+de-instancing. (3) Unique material networks per instance instead of shared
+materials driven by primvars. (4) Per-instance topology/geometry tweaks.
+(5) Tools that flatten or ``bake'' selections, silently replacing instances
+with copies. Each forks prototypes --- memory and compose time scale with
+instance count again.
+\end{DrillSolution}
 
 \subsection*{Drill 2: InstanceProxy mental model}
-Explain what path you expect when selecting a prim inside an instance.
+Explain what path you expect when selecting a prim inside an instance, and
+what you can do with it.
 \AnswerLines{6}
+\begin{DrillSolution}
+You get the \emph{instance's} path (\texttt{/Forest/Tree\_01/Crown}), not a
+prototype path --- a proxy prim that exists for reading: traversal,
+inspection, computing bounds, hit-testing. What you cannot do is author on
+it; edits must go to the prototype's source or follow de-instancing.
+\end{DrillSolution}
 
-\subsection*{Mini-checklist}
+\subsection*{Drill 3: Hiding strategies}
+Compare three ways to hide scattered instances: \texttt{invisibleIds},
+authoring \texttt{visibility} on prototypes, and deleting entries from the
+arrays.
+\AnswerLines{6}
+\begin{DrillSolution}
+\texttt{invisibleIds}: per-instance, cheap, reversible --- the intended tool.
+\texttt{visibility} on a prototype hides \emph{every} instance of that
+prototype --- right only for ``all rocks off''. Deleting array entries
+re-authors every parallel array (positions, indices, orientations\ldots),
+destroys ids, and is not reversible --- last resort.
+\end{DrillSolution}
+
+\section*{Checkpoint Questions}
+\addcontentsline{toc}{section}{Checkpoint Questions}
+
+\noindent\textbf{CQ1.} Make tree 7 of 500 instanced trees red; keep the other
+499 instanced. Steps?
+\begin{DrillSolution}
+\texttt{SetInstanceable(False)} on \texttt{Tree\_07} (it stops sharing the
+prototype), then author \texttt{displayColor} on its crown normally. The
+other 499 still share one prototype. If \emph{many} trees need recoloring,
+prefer a variant or primvar on the asset instead --- mass de-instancing is
+the trap from Drill 1.
+\end{DrillSolution}
+
+\noindent\textbf{CQ2.} Add a third prototype (\texttt{Fern}) to the scatter
+above and make instance 3 use it. Which exact edits?
+\begin{DrillSolution}
+Define \texttt{/Scatter/Protos/Fern}; append its path to the
+\texttt{prototypes} relationship (it becomes index 2); set
+\texttt{protoIndices[3] = 2}. Two authored properties, one new prim.
+\end{DrillSolution}
+
+\noindent\textbf{CQ3.} Which of these succeed on an \emph{instance}:
+(a) setting its transform, (b) binding a material on the instance root,
+(c) setting \texttt{visibility} on a child mesh inside it?
+\begin{DrillSolution}
+(a) and (b) succeed --- the instance root is a real, editable prim. (c)
+fails: the child is an instance proxy; that edit needs the prototype's
+source or de-instancing first. (Verified in this chapter's listing ---
+authoring on a proxy raises \texttt{Tf.ErrorException}.)
+\end{DrillSolution}
+
+\subsection*{Mini-checklist (tick when mastered)}
 \begin{itemize}[leftmargin=*]
-  \item[$\square$] I can explain why instanceProxy exists.
-  \item[$\square$] I can describe PointInstancer data layout (protoIndices + xforms).
+  \item[$\square$] I can explain why instanceProxy exists and what it permits.
+  \item[$\square$] I can describe PointInstancer data layout (protoIndices + arrays).
+  \item[$\square$] I know the two-track edit rule: all instances vs one instance.
+  \item[$\square$] I hide scatter instances with \texttt{invisibleIds}, not array surgery.
 \end{itemize}

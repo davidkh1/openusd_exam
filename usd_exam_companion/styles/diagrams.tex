@@ -1,0 +1,32 @@
+% Shared visual language for composition / scenegraph diagrams.
+% Every figure in the book uses these styles: one palette, one look.
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+% Palette
+\definecolor{usdgreen}{HTML}{76B900}   % accent green
+\definecolor{arcRef}{HTML}{1F6FEB}     % references
+\definecolor{arcPay}{HTML}{D9730D}     % payloads
+\definecolor{arcVar}{HTML}{0E8A8A}     % variant sets
+\definecolor{arcInh}{HTML}{7C3AED}     % inherits
+\definecolor{arcSpec}{HTML}{57606A}    % specializes
+\definecolor{layerFill}{HTML}{F3F8E8}  % layer boxes
+\definecolor{primFill}{HTML}{F6F8FA}   % prim boxes
+
+\tikzset{
+  layerbox/.style={draw=usdgreen!60!black, fill=layerFill, rounded corners=2pt,
+    minimum width=3.0cm, minimum height=0.66cm, font=\small\ttfamily},
+  primbox/.style={draw=black!55, fill=primFill, rounded corners=2pt,
+    minimum width=2.4cm, minimum height=0.6cm, font=\small\ttfamily},
+  strengthbox/.style={draw=black!50, fill=black!4, rounded corners=2pt,
+    text width=8.6cm, minimum height=0.62cm, align=left,
+    font=\small\sffamily},
+  notetext/.style={font=\scriptsize\sffamily, text=black!70},
+  arc/.style={-{Stealth[length=2.6mm]}, thick},
+  refArc/.style={arc, draw=arcRef},
+  payArc/.style={arc, draw=arcPay, dashed},
+  varArc/.style={arc, draw=arcVar},
+  inhArc/.style={arc, draw=arcInh, densely dotted},
+  specArc/.style={arc, draw=arcSpec, densely dotted},
+  subArc/.style={arc, draw=usdgreen!60!black},
+  arcLabel/.style={font=\scriptsize\sffamily, midway, sloped, above},
+}

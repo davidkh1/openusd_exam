@@ -12,22 +12,269 @@
 \end{Objectives}
 
 \begin{Resources}
-  \item Learn OpenUSD: Asset Structure; Composition Basics; Beyond the Basics
-  \item Concepts: defaultPrim; kind; model hierarchy; variant authoring best practice
+  \item Learn OpenUSD: Asset Structure Principles and Content Aggregation;
+        Composition Basics; Beyond the Basics
+  \item Technical references: Principles of Scalable Asset Structure;
+        ASWF Asset Structure Guidelines; USD FAQ ``SubLayers or References?''
+  \item OpenUSD glossary: Subcomponent; Crate File Format; Flatten; Edit Target
+  \item OpenUSD API: UsdStage::Flatten; SdfChangeBlock; UsdNotice
 \end{Resources}
 
 \CheatSheetTitle
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Asset structure}: stable root prim, predictable paths, consistent kind/model hierarchy.
-  \item \textbf{Collaboration}: separate “authored source” from “published” layers; use sublayers for departments.
-  \item \textbf{Validation gates}: enforce rules at publish time, not when scenes break downstream.
+  \item \textbf{Asset interface pattern}: a small entry-point layer (stable
+        name, \texttt{defaultPrim}, \texttt{kind}, \texttt{assetInfo})
+        payloads the heavy contents. Consumers reference the interface and
+        never see the internals.\index{asset structure}
+  \item \textbf{Kinds nest}: \texttt{assembly} $>$ \texttt{group} $>$
+        \texttt{component} $>$ \texttt{subcomponent}; models must form a
+        \emph{contiguous} tree --- a component under a plain prim is not a
+        model.\index{kind}\index{model hierarchy}
+  \item \textbf{SubLayers vs References}: layers in the same stack share one
+        namespace (departments on a shot); references graft subtrees under
+        new paths (assets into scenes).
+  \item \textbf{Custom metadata}: per-asset facts in \texttt{assetInfo};
+        free-form notes in \texttt{customData}; neither is time-sampled.
+  \item \textbf{Asset paths}: relative, forward slashes, resolver-friendly ---
+        validate at publish time, not when a render farm machine fails.
+  \item \textbf{Resolvers} (Ar) turn logical identifiers
+        (\texttt{asset://chair}) into real files --- pipelines pin versions
+        there, not in scene files.\index{resolver}
+  \item \textbf{Delivery}: flatten (and \texttt{usdzip}) to strip composition
+        and proprietary paths from outgoing assets.
 \end{itemize}
+
+\section{Core Concepts}
+
+\subsection{The asset interface pattern}\label{sec:pd-iface}\objref{7.2}
+Scalable pipelines standardize what an asset looks like \emph{from outside}:
+one small entry-point layer with a stable prim name and metadata, which
+payloads the actual contents. Publishing a new version means updating what
+the interface points at --- no consumer scene changes.
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Chair" )
+def Xform "Chair" (
+    kind = "component"
+    assetInfo = {
+        string name = "Chair"
+        string version = "v003"
+    }
+    prepend payload = @./contents.usda@
+)
+{
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "Chair" )
+def Xform "Chair" {
+    def Scope "Geometry" {
+        def Sphere "Seat" {
+        }
+    }
+    def Scope "Looks" {
+    }
+}
+\end{lstlisting}
+
+\noindent\objref{7.6}Everything heavy lives behind the payload: consumers
+who only need the scene skeleton load nothing, and
+\texttt{assetInfo}\index{assetInfo} carries pipeline facts (name, version)
+that tools can query without conventions-by-folklore.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[layerbox, minimum width=2.6cm] (iface) {Chair.usda};
+    \node[notetext, above=1.5mm of iface] {interface: defaultPrim, kind, assetInfo};
+    \node[layerbox, minimum width=2.6cm, right=17mm of iface] (contents) {contents.usda};
+    \node[primbox, minimum width=2.0cm, below left=8mm and -10mm of contents] (geo) {Geometry};
+    \node[primbox, minimum width=2.0cm, below right=8mm and -10mm of contents] (looks) {Looks};
+    \draw[payArc] (iface) -- node[arcLabel] {payload} (contents);
+    \draw[arc, draw=black!50] (contents.south) -- (geo.north);
+    \draw[arc, draw=black!50] (contents.south) -- (looks.north);
+    \node[layerbox, minimum width=2.4cm, left=14mm of iface] (scene) {scene.usda};
+    \draw[refArc] (scene) -- node[arcLabel] {reference} (iface);
+  \end{tikzpicture}
+  \caption{The asset interface pattern: scenes reference a thin, stable entry
+  point; the entry point payloads the heavy, evolving contents.}
+  \label{fig:asset-iface}
+\end{figure}
+
+\subsection{Kinds and the model hierarchy}\label{sec:pd-kinds}\objref{7.2, 3.3}
+\index{kind}\index{model hierarchy}Kinds make large scenes navigable:
+\texttt{assembly} (published groups of models), \texttt{group} (organizational
+interior nodes), \texttt{component} (the leaf-level publishable asset),
+\texttt{subcomponent} (named pieces inside a component). Tools rely on the
+\emph{model hierarchy rule}: every ancestor of a model must itself be a group
+(or assembly). Break the chain and queries silently stop seeing your asset:
+
+\begin{lstlisting}
+#usda 1.0
+( defaultPrim = "City" )
+def Xform "City" ( kind = "assembly" ) {
+    def Xform "Block" ( kind = "group" ) {
+        def Xform "Bldg" ( kind = "component" ) {
+            def Xform "Door" ( kind = "subcomponent" ) {
+            }
+        }
+    }
+    def Xform "Plain" {
+        def Xform "Orphan" ( kind = "component" ) {
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd
+
+stage = Usd.Stage.Open("hierarchy.usda")
+for path in ("/City", "/City/Block", "/City/Block/Bldg",
+             "/City/Block/Bldg/Door", "/City/Plain/Orphan"):
+    prim = stage.GetPrimAtPath(path)
+    print(path, Usd.ModelAPI(prim).GetKind(),
+          "model" if prim.IsModel() else "-")
+\end{lstlisting}
+
+\begin{Gotcha}
+Run it (the book did): \texttt{/City/Plain/Orphan} has
+\texttt{kind = component} yet \texttt{IsModel()} is \textbf{False} --- its
+parent \texttt{Plain} has no group kind, so the model chain is broken.
+Model-hierarchy traversals and ``find all components'' tools will skip it.
+The fix is organizational, not code: give interior prims group kinds.
+\end{Gotcha}
+
+\subsection{SubLayers or references?}\label{sec:pd-subref}\objref{1.3, 1.5}
+The FAQ question is an exam question in disguise. \emph{Sublayers} stack whole
+layers into one shared namespace --- right when several parties author
+opinions about the \emph{same} prims (shot workflows: layout, animation,
+lighting). \emph{References} graft a subtree under a chosen path --- right
+when content must appear (possibly many times) \emph{inside} something else
+(assets into sets, sets into shots). A useful tiebreaker: if you would need to
+re-path prims to combine the files, you wanted a reference.
+
+\subsection{Validating asset paths}\label{sec:pd-paths}\objref{7.7}
+\index{asset path}Published layers travel: farm machines, other sites, other
+studios. Absolute paths and backslashes are how assets die in transit. The
+dependency list is one call away, so gate it at publish:
+
+\begin{lstlisting}[language=Python]
+from pxr import Sdf
+
+layer = Sdf.Layer.FindOrOpen("Chair.usda")
+for path in layer.GetCompositionAssetDependencies():
+    ok = not path.startswith("/") and "\\" not in path
+    print(("OK  " if ok else "BAD ") + path)
+# prints: OK  ./contents.usda
+\end{lstlisting}
+
+\begin{ExamTip}
+``Validate asset paths are formatted correctly'' $\Rightarrow$ relative to the
+layer, forward slashes, resolvable by the studio resolver, and no machine-
+or user-specific roots. Pair it with the export validator from the Data
+Exchange chapter --- same gate, same publish step.
+\end{ExamTip}
+
+\subsection{Resolvers in the pipeline}\label{sec:pd-res}\objref{7.5, 3.5}
+\index{resolver}An Ar resolver maps \emph{logical} asset identifiers to real
+files at open time: \texttt{asset://props/chair} might resolve to
+\texttt{/site/v003/chair.usdc} today and to a new version tomorrow ---
+without touching a single scene file. That is where pinning, platform roots,
+and site-specific storage belong. Scene files keep clean logical paths; the
+resolver owns policy. (Writing one is plugin work --- see Customizing USD.)
+
+\subsection{Delivery: flatten and strip}\label{sec:pd-deliver}\objref{1.9, 7.1}
+To send an asset outside the pipeline, remove what outsiders cannot resolve:
+\texttt{UsdStage::Flatten()} bakes composition (and resolves internal
+references away); \texttt{usdzip} packages the result with its textures.
+What you lose --- overridability, variants, payload deferral --- is exactly
+what you do not want to leak.\index{flatten}\index{usdzip}
+
+\begin{DeepDive}
+Asset-structure \emph{guidelines} (objective: document them!) are a short
+contract, not a wiki: entry-point naming, \texttt{defaultPrim} == asset name,
+kind policy, where Geometry/Looks scopes live, primvar and namespace
+conventions, path rules, and the validation gate that enforces all of it.
+The ASWF Asset Structure Guidelines are the public reference point --- steal
+their shape.
+\end{DeepDive}
 
 \DrillsTitle
 \subsection*{Drill 1: Asset contract}
-Write 10 rules for your “publishable USD asset contract”.
+Write 10 rules for your ``publishable USD asset contract''.
 \AnswerLines{10}
+\begin{DrillSolution}
+A solid contract: (1) entry-point layer named like the asset; (2)
+\texttt{defaultPrim} set and equal to the root prim; (3) root prim
+\texttt{kind = component} (or assembly for published groups); (4) heavy data
+behind a payload; (5) \texttt{Geometry}/\texttt{Looks} scopes in fixed
+places; (6) \texttt{assetInfo} carries name and version; (7) all asset paths
+relative with forward slashes; (8) units and up-axis declared; (9) extents
+authored on all Boundables; (10) passes the publish validator --- no
+warnings, \texttt{usdchecker} clean.
+\end{DrillSolution}
 
 \subsection*{Drill 2: Naming and layout}
 Propose a directory structure for an asset with geo, materials, and anim.
 \AnswerLines{8}
+\begin{DrillSolution}
+One workable shape: \texttt{Chair/Chair.usda} (interface),
+\texttt{Chair/contents.usda} (assembly of the parts), and
+\texttt{Chair/parts/\{geometry,looks,anim\}.usda}. The interface payloads
+\texttt{contents.usda}; contents sublayers (same namespace!) the parts.
+Versioning happens by publishing new part files and re-pointing ---
+consumers only ever reference \texttt{Chair/Chair.usda}.
+\end{DrillSolution}
+
+\subsection*{Drill 3: SubLayers or references?}
+For each case pick one and justify: (a) lighting overrides on a shot; (b) a
+chair placed 40 times in a restaurant; (c) merging two departments' edits to
+the same character.
+\AnswerLines{6}
+\begin{DrillSolution}
+(a) Sublayer --- same namespace, strength by list order. (b) References
+(instanceable!) --- the same subtree grafted under 40 paths. (c) Sublayers
+--- both edit the same prims; references would duplicate the character under
+two roots.
+\end{DrillSolution}
+
+\section*{Checkpoint Questions}
+\addcontentsline{toc}{section}{Checkpoint Questions}
+
+\noindent\textbf{CQ1.} A tool that lists all components in a scene misses one
+asset. Its kind is correctly \texttt{component}. What is the first thing to
+check?
+\begin{DrillSolution}
+The ancestors: model hierarchy must be contiguous. If any ancestor lacks a
+group/assembly kind, \texttt{IsModel()} is False for the component and
+model-hierarchy traversals skip it --- verified in this chapter's listing.
+\end{DrillSolution}
+
+\noindent\textbf{CQ2.} Publishing v004 of an asset must not touch any of the
+1{,}200 shots referencing it. Which two mechanisms make that possible?
+\begin{DrillSolution}
+The asset interface pattern (shots reference a stable entry-point layer, so
+content behind it can change) and/or a resolver that maps a logical
+identifier to the current published version. Both keep ``which version''
+out of scene files.
+\end{DrillSolution}
+
+\noindent\textbf{CQ3.} Name the API call that lists a layer's external asset
+dependencies for a path-validation gate.
+\begin{DrillSolution}
+\texttt{Sdf.Layer.GetCompositionAssetDependencies()} --- sublayer, reference,
+and payload asset paths of that layer, ready to be checked for absolute
+paths, backslashes, and resolvability.
+\end{DrillSolution}
+
+\subsection*{Mini-checklist (tick when mastered)}
+\begin{itemize}[leftmargin=*]
+  \item[$\square$] I can draw the asset interface pattern from memory.
+  \item[$\square$] I can state the model-hierarchy contiguity rule and its failure mode.
+  \item[$\square$] I can argue sublayers vs references for any concrete case.
+  \item[$\square$] I can name the publish-time gates (paths, metadata, extents, checker).
+\end{itemize}

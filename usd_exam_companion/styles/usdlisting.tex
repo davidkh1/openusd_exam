@@ -1,0 +1,43 @@
+\usepackage{listings}
+
+% Listing palette (print-safe: keywords stay bold for grayscale printing)
+\definecolor{usdKeyword}{HTML}{0550AE}   % structural keywords / metadata keys
+\definecolor{usdType}{HTML}{8250DF}      % value types
+\definecolor{usdString}{HTML}{0A7B30}    % strings
+\definecolor{usdComment}{HTML}{6E7781}   % comments and the #usda cookie
+\definecolor{usdFrame}{HTML}{C4C9CE}
+\definecolor{usdBg}{HTML}{FAFAF7}
+
+\lstdefinelanguage{USDA}{
+  morekeywords={def,over,class,variantSet,variants,variantSets,
+    prepend,append,add,delete,reorder,
+    references,payload,inherits,specializes,subLayers,
+    uniform,custom,rel,
+    defaultPrim,upAxis,metersPerUnit,startTimeCode,endTimeCode,
+    kind,apiSchemas,instanceable,active,bindMaterialAs,
+    offset,scale,timeSamples},
+  morekeywords=[2]{token,string,asset,bool,int,float,double,
+    double3,float3,int2,color3f,point3f,normal3f,vector3d,
+    matrix4d,texCoord2f,quatf},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+
+\lstset{
+  language=USDA,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{usdKeyword},
+  keywordstyle=[2]\color{usdType},
+  stringstyle=\color{usdString},
+  commentstyle=\itshape\color{usdComment},
+  columns=fullflexible,
+  frame=single,
+  rulecolor=\color{usdFrame},
+  backgroundcolor=\color{usdBg},
+  breaklines=true,
+  tabsize=2,
+  showstringspaces=false,
+  aboveskip=0.8em,
+  belowskip=0.6em,
+}

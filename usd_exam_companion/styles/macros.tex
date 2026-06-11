@@ -1,0 +1,25 @@
+\newcommand{\DomainHeader}[2]{
+  \chapter{#1}
+  \noindent\textbf{Exam Weight:} #2\par\vspace{0.4em}
+}
+
+\newenvironment{Objectives}{\section{Objectives}\begin{itemize}[leftmargin=*]}{\end{itemize}}
+\newenvironment{Resources}{\section{Recommended resources}\begin{itemize}[leftmargin=*]}{\end{itemize}}
+
+% Margin tag tying a passage to numbered study-guide objectives, e.g.
+% \objref{1.6} or \objref{1.10, 2.5}. Bare numbers; domain prefixes implied
+% by the guide's numbering (1=Composition ... 8=Visualization).
+\newcommand{\objref}[1]{\marginnote{%
+  \raggedright\scriptsize\sffamily\color{black!55}#1}}
+
+\newcommand{\CheatSheetTitle}{\section*{Cheat Sheet (one page)}\addcontentsline{toc}{section}{Cheat Sheet}}
+\newcommand{\DrillsTitle}{\section*{Exercises and Drills}\addcontentsline{toc}{section}{Exercises and Drills}}
+
+\newcommand{\AnswerLines}[1]{%
+  \par\nopagebreak\vspace{0.2em}\nopagebreak\noindent
+  \rule{\textwidth}{0.4pt}\par
+  \vspace{0.2em}
+  \noindent\textit{Write here:}\par
+  \vspace{0.2em}
+  \foreach \i in {1,...,#1}{\noindent\rule{\textwidth}{0.4pt}\par\vspace{0.55em}}%
+}

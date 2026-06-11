@@ -1,0 +1,57 @@
+\newcommand{\HalfTitlePage}{
+  \newgeometry{top=1.75in,bottom=.5in}
+  \begin{titlepage}
+  \begin{flushleft}
+  \textbf{\fontfamily{qcs}\fontsize{44}{50}\selectfont OpenUSD\\Exam\\Companion\\}
+  \par\noindent\rule{\textwidth}{4pt}\\[6pt]
+  \begin{tikzpicture}
+  \shade[bottom color=usdgreen!22,top color=white]
+      (0,0) rectangle (\textwidth, 1.6)
+      node[midway] {\parbox{0.92\textwidth}{\centering\textbf{\large \textit{\booksubtitle}}}};
+  \end{tikzpicture}
+  \begin{flushright}\Large \edition\end{flushright}
+  \vspace{\fill}
+  \end{flushleft}
+  \end{titlepage}
+  \restoregeometry
+}
+
+\newcommand{\TitlePage}{
+  \thispagestyle{empty}
+  \newgeometry{top=1.75in,bottom=.5in}
+  \begin{titlepage}
+  \begin{flushleft}
+  \textbf{\fontfamily{qcs}\fontsize{44}{50}\selectfont \booktitle\\}
+  \par\noindent\rule{\textwidth}{4pt}\\[6pt]
+  \begin{tikzpicture}
+  \shade[bottom color=usdgreen!22,top color=white]
+      (0,0) rectangle (\textwidth, 1.6)
+      node[midway] {\parbox{0.92\textwidth}{\centering\textbf{\large \textit{\booksubtitle}}}};
+  \end{tikzpicture}
+  \begin{flushright}\Large \edition\end{flushright}
+  \vspace{\fill}
+  \textbf{\large \bookauthor}
+  \vspace{\fill}
+  \end{flushleft}
+  \end{titlepage}
+  \restoregeometry
+}
+
+\newcommand{\ColophonPage}{
+  \thispagestyle{empty}
+  \begin{flushleft}
+  \vspace*{\fill}
+  This book was typeset using \LaTeX{}. Every USD example in it was executed
+  against a real OpenUSD build before publication.\\[1.2em]
+  This is an independent publication. It is not affiliated with, endorsed by,
+  or sponsored by NVIDIA Corporation. NVIDIA and NCP-OUSD are trademarks of
+  NVIDIA Corporation, used here for identification purposes only.\\
+  \vspace{\fill}
+  Copyright \textcopyright{} \the\year{} \bookauthor\\[0.6em]
+  Licensed under the \booklicense.\\
+  You may share verbatim copies of this book freely for non-commercial
+  purposes, with attribution. Commercial distribution and derivative works
+  require the author's permission.\\
+  \url{https://creativecommons.org/licenses/by-nc-nd/4.0/}
+  \end{flushleft}
+}

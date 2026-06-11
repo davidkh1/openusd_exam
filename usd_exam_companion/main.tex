@@ -2,6 +2,8 @@
 
 \input{styles/setup}
 \input{styles/usdlisting}
+\input{styles/diagrams}
+\input{styles/callouts}
 \input{styles/macros}
 \input{styles/titlepages}
 
@@ -14,12 +16,15 @@
 \chapter*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
 This companion is structured around NVIDIA’s \textit{NCP: OpenUSD Development Exam Study Guide (v1.1.0)}.
-It reorganises the blueprint into a book-like flow and adds space for notes, drills, and checklists.
+It reorganizes the blueprint into a book-like flow and adds space for notes, drills, and checklists.
 
 \bigskip
 \noindent\textbf{How to use this book}
 \begin{itemize}[leftmargin=*]
   \item For each domain: read the cheat sheet, work the drills, then do the questions.
+  \item Work each drill before reading the solution beneath it --- on paper if
+        you printed the book, out loud or in your notes if you are reading the
+        PDF. The recall attempt is the exercise; the solution is the check.
   \item Keep a running “gotchas” list (composition strength, instancing edits, material binding, etc.).
   \item Revisit the sample questions after each domain.
 \end{itemize}
@@ -34,16 +39,17 @@ It reorganises the blueprint into a book-like flow and adds space for notes, dri
 \part{Domains}
 \input{chapters/10-composition}
 \input{chapters/11-content-aggregation}
-\input{chapters/12-customising-usd}
+\input{chapters/12-customizing-usd}
 \input{chapters/13-data-exchange}
-\input{chapters/14-data-modelling}
+\input{chapters/14-data-modeling}
 \input{chapters/15-debugging}
 \input{chapters/16-pipeline-dev}
-\input{chapters/17-visualisation}
+\input{chapters/17-visualization}
 
 \part{Practice}
 \input{chapters/20-sample-questions}
 \input{chapters/21-answer-key}
+\input{chapters/22-coverage-map}
 
 \backmatter
 \addcontentsline{toc}{chapter}{Index}

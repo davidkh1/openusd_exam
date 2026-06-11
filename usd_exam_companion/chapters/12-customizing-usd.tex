@@ -1,0 +1,302 @@
+\DomainHeader{Customizing USD}{6\%}
+
+\begin{Objectives}
+  \item Build a USD plug-in against a specific USD version.
+  \item Build USD from source with custom dependencies.
+  \item Create custom model kinds when appropriate.
+  \item Create custom schemas for proprietary data models.
+  \item Integrate a custom resolver for dynamic asset paths.
+  \item Use schemas for nonstandard attributes/structures during import/export.
+  \item Write a SceneIndex plug-in that generates Hydra prims.
+  \item Write an AssetResolver that generates in-memory renderable primitives.
+\end{Objectives}
+
+\begin{Resources}
+  \item Learn OpenUSD: Understanding Model Kinds
+  \item OpenUSD tutorial: Generating New Schema Classes (usdGenSchema)
+  \item Whitepaper: What Are OpenUSD Schemas?
+  \item OpenUSD API: PlugRegistry; Kind --- Extensible Categorization;
+        Ar (Asset Resolution); file format plug-ins
+\end{Resources}
+
+\CheatSheetTitle
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Everything pluggable goes through one door}:
+        \texttt{plugInfo.json} files on \texttt{PXR\_PLUGINPATH\_NAME},
+        loaded by \texttt{PlugRegistry} --- schemas, kinds, file formats,
+        resolvers, Hydra plug-ins.\index{plugInfo.json}\index{PlugRegistry}
+  \item \textbf{Typed (IsA) schema}: defines a new prim type
+        (\texttt{def SimJoint}). \textbf{API schema}: adds properties and
+        behavior to \emph{existing} types (applied; recorded in
+        \texttt{apiSchemas} metadata).\index{IsA schema}\index{API schema}
+  \item \textbf{usdGenSchema} turns a \texttt{schema.usda} description into
+        registered schemas; with \texttt{skipCodeGeneration = true} they are
+        \emph{codeless} --- deployable without compiling.\index{usdGenSchema}\index{codeless schema}
+  \item \textbf{The formality ladder}: ad-hoc custom attributes $\to$
+        namespaced conventions $\to$ API schema $\to$ typed schema. Climb
+        only when querying/validation/tooling demands it.
+  \item \textbf{Custom kinds} extend the model hierarchy vocabulary via
+        plugInfo (\texttt{"vehicle" baseKind "component"}) --- every site
+        that opens your assets needs the same registration.\index{kind}
+  \item \textbf{Ar resolver}: logical identifier $\to$ resolved path;
+        contexts pin versions/sites. \textbf{File format plug-in}: teaches
+        USD to read a foreign format \emph{as} scene description.
+        \textbf{SceneIndex}: procedurally feeds Hydra prims at render time.
+  \item \textbf{Version pinning}: plug-ins link against one exact USD
+        build --- ABI compatibility is per-version, so match headers,
+        compiler, and flags.
+\end{itemize}
+
+\section{Core Concepts}
+
+\subsection{The plugin map}\label{sec:cu-map}\objref{3.1}
+
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}[node distance=5mm and 8mm]
+    \node[layerbox, minimum width=3.4cm] (reg) {PlugRegistry};
+    \node[notetext, above=1mm of reg] {discovers \texttt{plugInfo.json} on \texttt{PXR\_PLUGINPATH\_NAME}};
+    \node[primbox, below left=9mm and 14mm of reg] (schemas) {schemas};
+    \node[primbox, below left=9mm and -8mm of reg] (kinds) {kinds};
+    \node[primbox, below right=9mm and -8mm of reg] (ar) {Ar resolvers};
+    \node[primbox, below right=9mm and 14mm of reg] (ff) {file formats};
+    \node[primbox, below=20mm of reg] (hydra) {Hydra / SceneIndex};
+    \draw[arc, draw=black!55] (reg.south) -- (schemas.north);
+    \draw[arc, draw=black!55] (reg.south) -- (kinds.north);
+    \draw[arc, draw=black!55] (reg.south) -- (ar.north);
+    \draw[arc, draw=black!55] (reg.south) -- (ff.north);
+    \draw[arc, draw=black!55] (reg.south) -- (hydra.north);
+  \end{tikzpicture}
+  \caption{One discovery mechanism, five common extension points. If a
+  plug-in ``doesn't load'', debug the door first:
+  \texttt{TF\_DEBUG=PLUG\_REGISTRATION}.}
+  \label{fig:plugin-map}
+\end{figure}
+
+\subsection{Custom schemas: describe once, generate the rest}\label{sec:cu-schemas}\objref{3.4, 3.6}
+\index{usdGenSchema}A proprietary data model becomes a first-class USD
+citizen through a \texttt{schema.usda} description that
+\texttt{usdGenSchema} consumes:
+
+\begin{lstlisting}
+#usda 1.0
+(
+    subLayers = [@usd/schema.usda@]
+)
+over "GLOBAL" (
+    customData = {
+        string libraryName = "simRobot"
+        string libraryPath = "."
+        bool skipCodeGeneration = true
+    }
+)
+{
+}
+class SimJoint "SimJoint" (
+    inherits = </Typed>
+)
+{
+    float torqueLimit = 100 (
+        doc = "Maximum torque in Nm."
+    )
+}
+class "WearAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "singleApply"
+    }
+)
+{
+    float wearAmount = 0 (
+        doc = "0 = pristine, 1 = destroyed."
+    )
+}
+\end{lstlisting}
+
+\noindent One file declares both flavors: \texttt{SimJoint} is a
+\emph{typed} (IsA) schema --- prims can be \texttt{def SimJoint} --- and
+\texttt{WearAPI} is an \emph{applied API} schema that any existing prim type
+can opt into. With \texttt{skipCodeGeneration = true} the result is a
+\emph{codeless} schema: registered purely as data (plugInfo +
+generated schema layer), no C++ to compile or deploy --- the modern default
+for pipeline schemas.\index{codeless schema}
+
+\begin{ExamTip}
+Typed vs API in one breath: \emph{is it a thing, or a capability of existing
+things?} New prim type with its own identity $\Rightarrow$ typed/IsA.
+Extra properties for prims that already have a type (physics on meshes,
+wear on props) $\Rightarrow$ applied API schema. Reach for schemas at all
+only when ad-hoc namespaced attributes stop being enough --- fallbacks,
+docs, validation, generated accessors.
+\end{ExamTip}
+
+\subsection{Applied API schemas in action}\label{sec:cu-api}\objref{3.4}
+Application is recorded on the prim (in \texttt{apiSchemas} metadata) and
+queryable --- here with a built-in multiple-apply schema, which behaves
+exactly like the ones usdGenSchema generates for you:
+
+\begin{lstlisting}[language=Python]
+from pxr import Usd, UsdGeom
+
+stage = Usd.Stage.CreateInMemory()
+prim = UsdGeom.Xform.Define(stage, "/Robot").GetPrim()
+
+Usd.CollectionAPI.Apply(prim, "render")
+print(prim.HasAPI(Usd.CollectionAPI))   # True
+print(prim.GetAppliedSchemas())         # ['CollectionAPI:render']
+\end{lstlisting}
+
+\noindent\texttt{Apply()} records the intent, \texttt{HasAPI()} answers
+cheaply, and multiple-apply schemas take an instance name (here
+\texttt{render}) so one capability can exist several times on a prim.
+
+\subsection{Building USD itself}\label{sec:cu-build}\objref{3.2, 3.1}
+\index{build\_usd.py}Sometimes the pipeline needs its own USD: a DCC ships
+one build, the farm needs another, or a plug-in requires components the
+prebuilt binaries exclude. The supported path is the repository's
+\texttt{build\_usd.py}, which fetches dependencies and drives CMake; the
+decisions that matter are the flags --- \texttt{--no-imaging} (core only, no
+Hydra) for headless services, \texttt{--no-python} for embedded use,
+optional components like MaterialX or OpenVDB, and monolithic vs shared
+libraries. ``Custom dependencies'' in practice means pinning versions ---
+TBB, MaterialX, OpenSubdiv, and above all the \emph{compiler and flags},
+because every plug-in must be built with the same toolchain as the USD that
+loads it.
+
+\begin{ExamTip}
+Exam framing for ``build USD from source'': component control (strip
+imaging on a farm), dependency pinning to match a DCC's runtime, and ABI
+parity for in-house plug-ins. Know the tool's name ---
+\texttt{build\_usd.py} --- and that prebuilt binaries (pip
+\texttt{usd-core}, NVIDIA releases) trade those choices away for
+convenience.
+\end{ExamTip}
+
+\subsection{Custom kinds}\label{sec:cu-kinds}\objref{3.3}
+\index{kind}The kind vocabulary itself is extensible --- a
+\texttt{plugInfo.json} resource registers new kinds into the hierarchy:
+
+\begin{lstlisting}
+{
+    "Plugins": [{
+        "Type": "resource",
+        "Name": "studioKinds",
+        "Info": {
+            "Kinds": {
+                "vehicle": { "baseKind": "component" }
+            }
+        }
+    }]
+}
+\end{lstlisting}
+
+\noindent\texttt{baseKind} slots the new kind into existing semantics ---
+a \texttt{vehicle} \emph{is a} component, so model-hierarchy tools keep
+working. Create custom kinds when tools must select your category
+(``all vehicles''), and remember the registration must exist on
+\emph{every} site that consumes the assets --- kinds are vocabulary, not
+data.
+
+\subsection{Resolvers, file formats, and SceneIndex --- who does what}\label{sec:cu-ext}\objref{3.5, 3.7, 3.8}
+Three extension points get conflated on exams; the boundaries are clean:
+
+An \textbf{Ar resolver}\index{resolver} answers ``\emph{where} is asset
+\texttt{X}?'' --- it maps logical identifiers
+(\texttt{asset://props/chair?version=latest}) to concrete resolved paths,
+honoring contexts (site, show, pin file). It never parses content.
+
+A \textbf{file format plug-in}\index{file format plug-in} answers ``how do I
+read \emph{this kind of file} as USD?'' --- it parses a foreign format into
+scene description on demand (that is how \texttt{usda}/\texttt{usdc}/Alembic
+themselves are wired in). Dynamic file formats can even \emph{generate}
+prims from parameters.
+
+A \textbf{SceneIndex plug-in}\index{SceneIndex} sits on the Hydra side:
+it filters or procedurally generates \emph{render} prims after composition
+--- geometry the stage never authored (the ``in-memory renderable
+primitives'' objective lives here and in dynamic file formats).
+
+\begin{Gotcha}
+``Build a plug-in against a specific USD version'' is not ceremony: USD's
+C++ ABI changes between releases, so a plug-in must be compiled against the
+\emph{exact} USD build that loads it --- same version, same compiler
+family, same flags. A plug-in built for a studio's USD 24.08 will not load
+into the pip \texttt{usd-core} of a different version; the symptom is a
+silent non-load, and the diagnosis is \texttt{TF\_DEBUG=PLUG\_REGISTRATION}.
+\end{Gotcha}
+
+\DrillsTitle
+\subsection*{Drill 1: Typed vs API schema}
+Give 2 examples of when you would choose each.
+\AnswerLines{6}
+\begin{DrillSolution}
+Typed/IsA: a robot joint (\texttt{SimJoint}) or a studio-specific camera rig
+--- entities with their own identity that prims \emph{are}. Applied API:
+physics properties on existing meshes, wear/aging data on any prop ---
+capabilities added to prims that already have a type. Heuristic: \emph{is}
+vs \emph{has}.
+\end{DrillSolution}
+
+\subsection*{Drill 2: Resolver design}
+Sketch an example: \texttt{asset://chair?variant=oak} $\rightarrow$ actual
+file path.
+\AnswerLines{7}
+\begin{DrillSolution}
+The resolver parses scheme + identifier + query; consults its context (show
+config, pin file) for the published version; returns e.g.\
+\texttt{/site/assets/chair/v012/chair\_oak.usdc}. Scene files keep the
+logical URI; re-pinning the context retargets every scene at once. Cache
+invalidation and farm/workstation context parity are the two operational
+risks.
+\end{DrillSolution}
+
+\subsection*{Drill 3: Pick the mechanism}
+Custom attribute, API schema, typed schema, or custom kind --- one per case:
+(a) per-prim review notes; (b) ``all vehicles'' selection in tools; (c) a
+new \texttt{ConveyorBelt} entity; (d) torque limits on existing joints
+across shows.
+\AnswerLines{6}
+\begin{DrillSolution}
+(a) namespaced custom attribute (or \texttt{customData} if untyped and
+unsampled); (b) custom kind with \texttt{baseKind = component}; (c) typed
+schema; (d) applied API schema --- shared, documented, validatable across
+shows.
+\end{DrillSolution}
+
+\section*{Checkpoint Questions}
+\addcontentsline{toc}{section}{Checkpoint Questions}
+
+\noindent\textbf{CQ1.} A colleague's new schema ``does nothing'' on the farm
+but works locally. First two checks?
+\begin{DrillSolution}
+Is the plugin discoverable there (\texttt{PXR\_PLUGINPATH\_NAME} includes
+its \texttt{plugInfo.json}? \texttt{TF\_DEBUG=PLUG\_REGISTRATION}), and is
+the farm's USD the same version/ABI the plug-in was built against? Codeless
+schemas dodge the second problem entirely.
+\end{DrillSolution}
+
+\noindent\textbf{CQ2.} Why are codeless schemas the default recommendation
+for pipeline data models?
+\begin{DrillSolution}
+They deploy as data: no compilation, no ABI coupling, no per-platform
+builds --- just plugInfo + the generated schema layer on the plugin path.
+You give up generated C++/Python accessor classes; generic
+\texttt{UsdPrim}/\texttt{UsdAttribute} access and \texttt{HasAPI} still
+work.
+\end{DrillSolution}
+
+\noindent\textbf{CQ3.} Match the objective to the extension point:
+``generate renderable prims that were never authored on the stage.''
+\begin{DrillSolution}
+Hydra-side generation --- a SceneIndex plug-in (or, upstream of render, a
+dynamic file format producing prims from parameters). An Ar resolver is the
+wrong answer by definition: it locates content, it does not create it.
+\end{DrillSolution}
+
+\subsection*{Mini-checklist (tick when mastered)}
+\begin{itemize}[leftmargin=*]
+  \item[$\square$] I can explain what a resolver does in one sentence.
+  \item[$\square$] I can justify a schema over ad-hoc attrs --- and codeless over compiled.
+  \item[$\square$] I can place kinds/schemas/formats/resolvers/SceneIndex on the plugin map.
+  \item[$\square$] I know why plug-ins pin exact USD versions.
+\end{itemize}

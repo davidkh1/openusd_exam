@@ -1,5 +1,13 @@
 \chapter{Certification Sample Questions}
 
+\begin{FieldNote}
+Treat this chapter like the real thing at least once: no references, a
+timer running, and fast elimination of obviously-wrong options. Certified
+test-takers report time pressure as a bigger enemy than difficulty ---
+discarding distractors quickly is a trainable skill, and these questions
+are the training set.
+\end{FieldNote}
+
 \section*{Question 1}
 \addcontentsline{toc}{section}{Question 1}
 \noindent\textbf{Domain:} Composition\par
@@ -22,6 +30,7 @@
 \noindent\textbf{chair\_base.usda}
 \begin{lstlisting}
 #usda 1.0
+( defaultPrim = "Chair" )
 def Xform "Chair" {
     double3 xformOp:translate = (0, 0, 0)
     uniform token[] xformOpOrder = ["xformOp:translate"]
@@ -31,6 +40,7 @@ def Xform "Chair" {
 \noindent\textbf{chair\_repositioned.usda}
 \begin{lstlisting}
 #usda 1.0
+( defaultPrim = "Chair" )
 def Xform "Chair" {
     double3 xformOp:translate = (1, 0, 0)
 }
@@ -41,7 +51,7 @@ def Xform "Chair" {
 #usda 1.0
 def Xform "World" {
     def Xform "Chair" (
-        prepend references = [@./chair_base.usda@, @./chair_repositioned@]
+        prepend references = [@./chair_base.usda@, @./chair_repositioned.usda@]
     ) {
         double3 xformOp:translate = (0, 1, 0)
     }
@@ -58,7 +68,7 @@ def Xform "World" {
 
 \section*{Question 3}
 \addcontentsline{toc}{section}{Question 3}
-\noindent\textbf{Domain:} Data Modelling\par
+\noindent\textbf{Domain:} Data Modeling\par
 \vspace{0.4em}
 \noindent\textbf{Question:} Which of the following attributes are required to properly define a \texttt{UsdGeomMesh} prim? \textit{(Select three options.)}
 \subsection*{Answer Choices}
@@ -66,13 +76,13 @@ def Xform "World" {
   \item A.\ points
   \item B.\ faceVertexIndices
   \item C.\ primvars:displayColor
-  \item D.\ extent
+  \item D.\ faceVertexCounts
   \item E.\ normals
 \end{itemize}
 
 \section*{Question 4}
 \addcontentsline{toc}{section}{Question 4}
-\noindent\textbf{Domain:} Data Modelling\par
+\noindent\textbf{Domain:} Data Modeling\par
 \vspace{0.4em}
 \noindent\textbf{Question:} You have a \texttt{UsdGeomMesh} with 1,000 vertices and 500 faces. The mesh uses \texttt{faceVertexIndices} to define triangular faces. What should be the length of the \texttt{faceVertexIndices} array?
 \subsection*{Answer Choices}
@@ -87,7 +97,7 @@ def Xform "World" {
 \addcontentsline{toc}{section}{Question 5}
 \noindent\textbf{Domain:} Pipeline Development\par
 \vspace{0.4em}
-\noindent\textbf{Question:} When creating a procedural mesh in USD, which attributes must be kept synchronised to ensure the mesh remains valid? \textit{(Select two options.)}
+\noindent\textbf{Question:} When creating a procedural mesh in USD, which attributes must be kept synchronized to ensure the mesh remains valid? \textit{(Select two options.)}
 \subsection*{Answer Choices}
 \begin{itemize}[leftmargin=*]
   \item A.\ points and extent — when vertex positions change
@@ -98,7 +108,7 @@ def Xform "World" {
 
 \section*{Question 6}
 \addcontentsline{toc}{section}{Question 6}
-\noindent\textbf{Domain:} Customising USD\par
+\noindent\textbf{Domain:} Customizing USD\par
 \vspace{0.4em}
 \noindent\textbf{Question:} You want to create a custom USD schema that adds physics properties to geometry prims. Which base class should your schema inherit from?
 \subsection*{Answer Choices}
@@ -119,7 +129,7 @@ def Xform "World" {
   \item A.\ Layers enable version control and tracking of asset changes across the pipeline.
   \item B.\ Layers allow multiple users to collaborate on the same scene without conflicts.
   \item C.\ Layers support nondestructive editing and make it easy to revert or update changes.
-  \item D.\ Layers improve scene performance by optimising data organisation and access.
+  \item D.\ Layers improve scene performance by optimizing data organization and access.
 \end{itemize}
 
 \section*{Question 8}
@@ -137,7 +147,7 @@ def Xform "World" {
 
 \section*{Question 9}
 \addcontentsline{toc}{section}{Question 9}
-\noindent\textbf{Domain:} Visualisation\par
+\noindent\textbf{Domain:} Visualization\par
 \vspace{0.4em}
 \noindent\textbf{Question:} What is the primary purpose of the \texttt{UsdGeomImageable} schema in USD?
 \subsection*{Answer Choices}
@@ -150,14 +160,14 @@ def Xform "World" {
 
 \section*{Question 10}
 \addcontentsline{toc}{section}{Question 10}
-\noindent\textbf{Domain:} Visualisation\par
+\noindent\textbf{Domain:} Visualization\par
 \vspace{0.4em}
-\noindent\textbf{Question:} You want to create a material that can be easily customised with different colours and textures. Which USD shading approach would be most appropriate?
+\noindent\textbf{Question:} You want to create a material that can be easily customized with different colors and textures. Which USD shading approach would be most appropriate?
 \subsection*{Answer Choices}
 \begin{itemize}[leftmargin=*]
   \item A.\ Create a single material with hardcoded shader parameters.
   \item B.\ Create a material with exposed parameters that can be overridden.
-  \item C.\ Create separate materials for each colour/texture combination.
+  \item C.\ Create separate materials for each color/texture combination.
   \item D.\ Use only the default material and modify it at render time.
 \end{itemize}
 
@@ -165,7 +175,7 @@ def Xform "World" {
 \addcontentsline{toc}{section}{Question 11}
 \noindent\textbf{Domain:} Content Aggregation\par
 \vspace{0.4em}
-\noindent\textbf{Question:} What happens when you reference a USD file with \texttt{metersPerUnit = 1.0} (metres) into a stage with \texttt{metersPerUnit = 0.01} (centimetres)?
+\noindent\textbf{Question:} You reference a USD file with \texttt{metersPerUnit = 1.0} (meters) into a stage with \texttt{metersPerUnit = 0.01} (centimeters). What happens?
 \subsection*{Answer Choices}
 \begin{itemize}[leftmargin=*]
   \item A.\ The USD runtime automatically rescales the referenced geometry to match the stage’s unit system.
@@ -200,7 +210,10 @@ def Xform "World" ( kind = "component" )
 }
 def Scope "Materials"
 {
-    def Material "metal" { # Material definition... }
+    def Material "metal"
+    {
+        # Material definition...
+    }
 }
 \end{lstlisting}
 
@@ -250,8 +263,20 @@ def Xform "MyBox" (
 )
 {
     variantSet "loftedColor" = {
-        "red" { over "Cube" ( variants = { string color = "red" } ) { } }
-        "blue"{ over "Cube" ( variants = { string color = "blue"} ) { } }
+        "red" {
+            over "Cube" (
+                variants = { string color = "red" }
+            )
+            {
+            }
+        }
+        "blue" {
+            over "Cube" (
+                variants = { string color = "blue" }
+            )
+            {
+            }
+        }
     }
 }
 \end{lstlisting}
@@ -269,8 +294,12 @@ def Xform "MyBox"
     )
     {
         variantSet "color" = {
-            "red"  { color3f[] primvars:displayColor = [(1, 0, 0)] }
-            "blue" { color3f[] primvars:displayColor = [(0, 0, 1)] }
+            "red" {
+                color3f[] primvars:displayColor = [(1, 0, 0)]
+            }
+            "blue" {
+                color3f[] primvars:displayColor = [(0, 0, 1)]
+            }
         }
     }
 }
@@ -280,6 +309,6 @@ def Xform "MyBox"
 \begin{itemize}[leftmargin=*]
   \item A.\ The “red” selection in \texttt{contents.usda} is strongest and overrides all other opinions.
   \item B.\ The direct local opinion for the \texttt{color} variant selection in \texttt{main.usda} is stronger than the opinion authored by \texttt{loftedColor}.
-  \item C.\ \texttt{loftedColor} does not set \texttt{primvars:displayColor}, so changing it cannot affect colour.
+  \item C.\ \texttt{loftedColor} does not set \texttt{primvars:displayColor}, so changing it cannot affect color.
   \item D.\ Variant selections cannot be authored in \texttt{main.usda}; they must be authored in \texttt{MyBox.usda}.
 \end{itemize}
