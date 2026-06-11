@@ -34,6 +34,8 @@ CHAPTER_LISTINGS = {
         'c10/broadcast.py',
         'c10/metal.usda',
         'c10/build_shot.py',
+        'c10/variant_api.py',
+        'c10/variant_api.out',
     ],
     '11-content-aggregation.tex': [
         'c11/tree.usda',
@@ -277,6 +279,26 @@ def test_c11_pointinstancer(scenarios, capfd):
     assert list(pi.GetProtoIndicesAttr().Get()) == [0, 1, 0, 1]
     assert len(pi.GetPositionsAttr().Get()) == 4
     assert list(pi.GetInvisibleIdsAttr().Get()) == [2]
+    assert_silent(capfd)
+
+
+def test_c10_produces_idiom(scenarios, capfd):
+    """The 'code -> produces -> usda' pair is real: every printed line of
+    the output listing (minus the ;; highlight markers) appears verbatim in
+    what the code actually exports."""
+    stage = Usd.Stage.CreateInMemory()
+    prop = stage.DefinePrim('/Prop', 'Xform')
+    vset = prop.GetVariantSets().AddVariantSet('look')
+    vset.AddVariant('worn')
+    vset.SetVariantSelection('worn')
+    exported = stage.GetRootLayer().ExportToString()
+
+    printed = (scenarios / 'c10/variant_api.out').read_text()
+    for line in printed.splitlines():
+        if line.startswith(';;'):
+            line = line[2:]
+        if line.strip():
+            assert line in exported, line
     assert_silent(capfd)
 
 

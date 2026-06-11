@@ -5,6 +5,7 @@
 \definecolor{usdType}{HTML}{8250DF}      % value types
 \definecolor{usdString}{HTML}{0A7B30}    % strings
 \definecolor{usdComment}{HTML}{6E7781}   % comments and the #usda cookie
+\definecolor{usdNew}{HTML}{B45309}       % lines just authored (produces idiom)
 \definecolor{usdFrame}{HTML}{C4C9CE}
 \definecolor{usdBg}{HTML}{FAFAF7}
 
@@ -40,4 +41,7 @@
   showstringspaces=false,
   aboveskip=0.8em,
   belowskip=0.6em,
+  % "produces" idiom: a line starting with ";;" renders without the marker,
+  % bold and amber — marking scene description that the code just authored.
+  moredelim=**[il][\bfseries\color{usdNew}]{;;},
 }

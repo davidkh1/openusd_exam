@@ -84,6 +84,7 @@ Practice questions (`20-sample-questions.tex`): `\section*{Question N}` plus `\a
 - Keep USD snippets tiny (3–20 lines) — the book's stated study method is reasoning about minimal layers ("which layer wins and why", LIVRPS).
 - Examples are developed on Linux but must read OS-neutral: relative forward-slash asset paths, no shell-specific steps in book text, cross-platform USD tooling only.
 - Listings show their output (Josuttis-style): any listing that prints carries the result inline as a comment (`# prints: ...`, `# True`), and the test suite asserts exactly those claims.
+- The "produces" idiom (adopted from the official OpenUSD tutorials): a Python listing, the `\produces` connector, then the usda it authored via `ExportToString()`. Lines the code authored start with `;;` in the .tex (rendered bold amber, marker invisible). The output listing maps to a `.out` file in `CHAPTER_LISTINGS` and a test asserts each printed line appears verbatim in the real export.
 - Callout boxes, by intent: ExamTip (what the exam rewards), Gotcha (verified failure modes), DeepDive (architecture context), FieldNote (synthesized test-taker experience — keep sourced from real write-ups, never invented), DrillSolution.
 
 ## Reference material (not built)
