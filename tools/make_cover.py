@@ -1,7 +1,9 @@
 """Generate the ebook covers from the book's own assets.
 
-Layout: dark ground, green accent rules, title block, the red-cube render on
-a white card (the book's signature figure), author + delivery line.
+Layout: dark ground, green accent rule, Latin Modern title (the book's own
+interior face), the red-cube render on a white card over a ghosted
+layer-stack motif, three differentiator lines, a small verified-examples
+trust line, author footer.
 
 Two outputs: cover.png (1600x2560, KDP's 1:1.6) and cover_page.png
 (1764x2560, the book's 6.375x9.25 trim — bound into the PDF as page one).
@@ -10,7 +12,7 @@ Run:  .venv/bin/python tools/make_cover.py
 """
 import pathlib
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 FIGURES = REPO / 'usd_exam_companion/figures'
@@ -22,58 +24,84 @@ GREEN = (118, 185, 0)
 WHITE = (240, 242, 240)
 GRAY = (150, 156, 160)
 
-FONT_DIR = pathlib.Path('/usr/share/fonts/truetype/dejavu')
-bold = lambda s: ImageFont.truetype(str(FONT_DIR / 'DejaVuSans-Bold.ttf'), s)
-regular = lambda s: ImageFont.truetype(str(FONT_DIR / 'DejaVuSans.ttf'), s)
+DEJAVU = pathlib.Path('/usr/share/fonts/truetype/dejavu')
+LM = pathlib.Path('/usr/share/texmf/fonts/opentype/public/lm')
+serif_bold = lambda s: ImageFont.truetype(str(LM / 'lmroman10-bold.otf'), s)
+sans = lambda s: ImageFont.truetype(str(DEJAVU / 'DejaVuSans.ttf'), s)
+sans_bold = lambda s: ImageFont.truetype(str(DEJAVU / 'DejaVuSans-Bold.ttf'), s)
 
 
 def make(W, H, out_name):
     OUT.mkdir(exist_ok=True)
     img = Image.new('RGB', (W, H), BG)
     d = ImageDraw.Draw(img)
+    M = 120  # side margin
 
-    # accent rules
-    d.rectangle([0, 0, W, 18], fill=GREEN)
+    # top accent rule
+    d.rectangle([0, 0, W, 14], fill=GREEN)
 
-    # title block
-    y = 140
+    # title block — the book's own Latin Modern, large and tight
+    y = 150
     for line in ('OpenUSD', 'Exam', 'Companion'):
-        d.text((120, y), line, font=bold(150), fill=WHITE)
-        y += 185
-
-    d.rectangle([120, 740, W - 120, 752], fill=GREEN)
-    d.text((120, 790), 'NCP-OUSD Prep Notes and Tested Examples',
-           font=regular(54), fill=GREEN)
+        d.text((M, y), line, font=serif_bold(176), fill=WHITE)
+        y += 200
+    d.rectangle([M, y + 52, W - M, y + 64], fill=GREEN)
+    d.text((M, y + 100), 'NCP-OUSD Prep Notes and Tested Examples',
+           font=sans(54), fill=GREEN)
+    y += 36
 
     # signature figure on a white card (renders carry alpha: flatten to white)
     cube_src = Image.open(FIGURES / 'q13_cube_red.png').convert('RGBA')
-    white = Image.new('RGBA', cube_src.size, (250, 250, 248, 255))
-    cube = Image.alpha_composite(white, cube_src).convert('RGB')
-    card_w = 1160
+    paper = Image.new('RGBA', cube_src.size, (250, 250, 248, 255))
+    cube = Image.alpha_composite(paper, cube_src).convert('RGB')
+    card_w = 1100
     scale = card_w / cube.width
     cube = cube.resize((card_w, int(cube.height * scale)))
     card = Image.new('RGB', (card_w + 40, cube.height + 40), (250, 250, 248))
     card.paste(cube, (20, 20))
     cx = (W - card.width) // 2
-    cy = 960
-    d.rectangle([cx - 6, cy - 6, cx + card.width + 6, cy + card.height + 6],
-                fill=GREEN)
+    cy = y + 190
+
+    # ghosted layer stack behind the card: weaker layers peek out beneath —
+    # the book's composition motif
+    overlay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    for i, alpha in ((3, 36), (2, 64), (1, 110)):
+        off = 30 * i
+        od.rounded_rectangle(
+            [cx - off, cy + off, cx + card.width - off, cy + card.height + off],
+            radius=10, outline=GREEN + (alpha,), width=5)
+    # soft shadow under the card
+    shadow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    sd.rectangle([cx + 10, cy + 16, cx + card.width + 22, cy + card.height + 28],
+                 fill=(0, 0, 0, 130))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(16))
+    img = Image.alpha_composite(img.convert('RGBA'), shadow)
+    img = Image.alpha_composite(img, overlay).convert('RGB')
     img.paste(card, (cx, cy))
+    d = ImageDraw.Draw(img)
 
-    # delivery line + author
-    feats = ['Every example executed against real USD',
-             'All 55 study-guide objectives, margin-tagged',
-             '60-question mock exam with explained key']
-    y = cy + card.height + 110
+    # three differentiators (the "tested examples" claim is table stakes —
+    # it lives in the small trust line below, not the headline lines)
+    feats = ['Which layer wins, and why — LIVRPS, drilled',
+             'Traps and gotchas: why each distractor fails',
+             '60-question mock exam, scored by domain']
+    # anchored from the footer so the block never collides with it
+    y_trust = H - 280 - 70
+    y = y_trust - 28 - 3 * 96
     for feat in feats:
-        d.ellipse([150, y + 18, 174, y + 42], fill=GREEN)
-        d.text((210, y), feat, font=regular(52), fill=WHITE)
-        y += 90
+        d.text((M + 30, y - 6), '✓', font=sans_bold(56), fill=GREEN)
+        d.text((M + 116, y), feat, font=sans(52), fill=WHITE)
+        y += 96
+    d.text((M + 116, y_trust),
+           'every example in this book was executed against real USD',
+           font=sans(38), fill=GRAY)
 
-    d.rectangle([120, H - 300, W - 120, H - 288], fill=GREEN)
-    d.text((120, H - 240), 'David Khosid', font=bold(72), fill=WHITE)
-    d.text((W - 120, H - 228), EDITION, font=regular(48),
-           fill=GRAY, anchor='ra')
+    # footer
+    d.rectangle([M, H - 280, W - M, H - 268], fill=GREEN)
+    d.text((M, H - 220), 'David Khosid', font=serif_bold(78), fill=WHITE)
+    d.text((W - M, H - 204), EDITION, font=sans(48), fill=GRAY, anchor='ra')
 
     img.save(OUT / out_name)
     print('wrote', OUT / out_name)
